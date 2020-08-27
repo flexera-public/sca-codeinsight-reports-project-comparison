@@ -41,7 +41,11 @@ def gather_data_for_report(domainName, port, projectID, project2ID, authToken, r
             componentName = inventoryItem["componentName"]
             componentVersionName = inventoryItem["componentVersionName"]
             selectedLicenseName = inventoryItem["selectedLicenseName"]
+            selectedLicenseSPDXIdentifier = inventoryItem["selectedLicenseSPDXIdentifier"]
             componentForgeName = inventoryItem["componentForgeName"]
+
+            if selectedLicenseSPDXIdentifier != "":
+                selectedLicenseName = selectedLicenseSPDXIdentifier
 
             keyValue = componentName + "-" + componentVersionName
             

@@ -123,7 +123,7 @@ def generate_html_report(reportData):
     html_ptr.write("        </style>\n")  
 
     html_ptr.write("    	<link rel='icon' type='image/png' href='data:image/png;base64, {}'>\n".format(encodedfaviconImage.decode('utf-8')))
-    html_ptr.write("        <title>%s</title>\n" %(reportName))
+    html_ptr.write("        <title>%s</title>\n" %(reportName.upper()))
     html_ptr.write("    </head>\n") 
 
     html_ptr.write("<body>\n")
@@ -140,7 +140,7 @@ def generate_html_report(reportData):
     html_ptr.write("    	<img src='data:image/svg+xml;base64,{}' style='width: 400px;'>\n".format(encodedLogoImage.decode('utf-8')))
     html_ptr.write("    </div>\n")
     html_ptr.write("    <div style='float:right' class='report-title'>\n")
-    html_ptr.write("         %s\n" %reportName) 
+    html_ptr.write("         %s\n" %reportName.upper()) 
     html_ptr.write("    </div>\n")
     html_ptr.write("</div>\n")
     html_ptr.write("        <p>\n")  
@@ -175,13 +175,13 @@ def generate_html_report(reportData):
     html_ptr.write("            <th colspan='2' class='text-center'>%s</th>\n" %projectNames[1]) 
     html_ptr.write("        </tr>\n") 
     html_ptr.write("        <tr>\n") 
-    html_ptr.write("            <th class='text-center'>Component</th>\n") 
+    html_ptr.write("            <th class='text-center'>COMPONENT</th>\n") 
 
-    html_ptr.write("            <th class='text-center'>Selected License</th>\n") 
-    html_ptr.write("            <th class='text-center'>Forge</th>\n")
+    html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
+    html_ptr.write("            <th class='text-center'>FORGE</th>\n")
 
-    html_ptr.write("            <th class='text-center'>Selected License</th>\n") 
-    html_ptr.write("            <th class='text-center'>Forge</th>\n")  
+    html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
+    html_ptr.write("            <th class='text-center'>FORGE</th>\n")  
     html_ptr.write("        </tr>\n")
     html_ptr.write("    </thead>\n")  
     html_ptr.write("    <tbody>\n")  
@@ -216,28 +216,28 @@ def generate_html_report(reportData):
             matchType = "CV"
         
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)
-        html_ptr.write("            <td class='text-center'>%s</th>\n" %(component))
+        html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
         
         if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
-            html_ptr.write("            <td class='td-nomatch text-center'>%s</th>\n" %proj1_selectedLicenseName)
+            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_selectedLicenseName)
         else:
-            html_ptr.write("            <td class='text-center'>%s</th>\n" %proj1_selectedLicenseName)
+            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_selectedLicenseName)
         
         if proj1_componentForgeName != proj2_componentForgeName and proj1_componentForgeName != "" and proj2_componentForgeName != "": 
-            html_ptr.write("            <td class='td-nomatch text-center'>%s</th>\n" %proj1_componentForgeName)
+            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_componentForgeName)
         else:
-            html_ptr.write("            <td class='text-center'>%s</th>\n" %proj1_componentForgeName)
+            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_componentForgeName)
 
         
         if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
-            html_ptr.write("            <td class='td-nomatch text-center'>%s</th>\n" %proj2_selectedLicenseName)
+            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_selectedLicenseName)
         else:
-            html_ptr.write("            <td class='text-center'>%s</th>\n" %proj2_selectedLicenseName)
+            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_selectedLicenseName)
 
         if proj1_componentForgeName != proj2_componentForgeName and proj1_componentForgeName != "" and proj2_componentForgeName != "": 
-            html_ptr.write("            <td class='td-nomatch text-center'>%s</th>\n" %proj2_componentForgeName)
+            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_componentForgeName)
         else:
-            html_ptr.write("            <td class='text-center'>%s</th>\n" %proj2_componentForgeName)
+            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_componentForgeName)
 
         html_ptr.write("        </tr>\n") 
     html_ptr.write("    </tbody>\n")

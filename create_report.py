@@ -99,7 +99,7 @@ def main():
 	#########################################################
 	# Upload the file to Code Insight
 	try:
-		CodeInsight_RESTAPIs.project.upload_reports.upload_project_report_data(domainName, port, projectID, project2ID, reportID, authToken, uploadZipfile)
+		CodeInsight_RESTAPIs.project.upload_reports.upload_project_report_data(domainName, port, projectID, reportID, authToken, uploadZipfile)
 	except:
 		print("Error uploading archive to Code Insight")
 		logger.error("Error uploading archive to Code Insight.")

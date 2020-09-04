@@ -14,6 +14,7 @@ import argparse
 import zipfile
 import os
 
+import _version
 import report_data
 import report_artifacts
 import CodeInsight_RESTAPIs.project.upload_reports
@@ -47,8 +48,8 @@ def main():
 
 	reportName = "Project Comparison Report"
 
-	logger.info("Creating %s" %reportName)
-	print("Creating %s" %reportName)
+	logger.info("Creating %s - %s" %(reportName, _version.__version__))
+	print("Creating %s - %s" %(reportName, _version.__version__))
 
 	# See what if any arguments were provided
 	args = parser.parse_args()

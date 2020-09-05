@@ -18,4 +18,4 @@ port=8888
 
 REPORTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-python3 ${REPORTDIR}/create_report.py -pid $projectId -rid $reportId -authToken $authToken -p2Id $project2Id -domainName $domainName -port $port
+python3 ${REPORTDIR}/create_report.py -pid $projectId -rid $reportId -authToken $authToken -p2id $project2Id -domainName $domainName -port $port

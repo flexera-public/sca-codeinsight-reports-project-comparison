@@ -4,10 +4,27 @@ The sca-codeinsight-reports-project-comparison repository is a example report fo
 
 ## Prerequisites
 
+ **Code Insight Release Requirements**
+  
+|Repository Tag|Minimum Code Insight Release  |
+|--|--|
+|1.0.x |2020R3  |
+
+
+**Submodule Repositories**
+
 This repository contains two submodules pointing to other git repos for code that can be in common to multiple projects.  After the initial clone of sca-codeinsight-reports-project-comparison you will need to enter the cloned directory and link and pull down the necessary code
 
     git submodule init
     git submodule update
+
+## Required Configuration
+
+There are two locations that require updates to provide the report scripts details about the host system.
+
+The [create_report.sh](create_report.sh) or [create_report.bat](create_report.bat) file contains a **baseURL** value that should be updated to allow for project and inventory links to point to the correct system. 
+
+For registraion purpsoses update the **baseURL** and **adminAuthToken** values within [registraion.py](registration.py) to reflect the correct values to allow the report itself to be registerd on the Code Insight server.    
 
 ## Usage
 

@@ -59,9 +59,12 @@ For this example report these three items are passed on to a batch or sh file wh
 Prior to being able to call the script directly from within Code Insight it must be registered. The registration.py file can be used to directly register the report once the contents of this repository have been copied into the custom_report_script folder at the base Code Insight installation directory.
 
 To register this report:
+
     python registration.py -reg
 
+
 To unregister this report:
+
     python registration.py -unreg
 
 ## License

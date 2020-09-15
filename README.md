@@ -18,6 +18,12 @@ This repository contains two submodules pointing to other git repos for code tha
     git submodule init
     git submodule update
 
+**Python Requirements**
+
+This repository requires the python requests module to interact with the Code Insight REST APIs.  To install this as well as the the modules it depends on the [requirements.txt](requirements.txt) file has been supplied and can be used as follows.
+
+    pip install -r requirements.txt    
+
 ## Required Configuration
 
 There are two locations that require updates to provide the report scripts details about the host system.

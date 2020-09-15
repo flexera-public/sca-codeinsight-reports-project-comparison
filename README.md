@@ -43,12 +43,13 @@ The Code Insight Custom Report Framework will provide the following to the custo
 - Authorization Token
 - Secondary Project ID
 
-For this example report these three items are passed on to a batch or sh file which will in turn execute a python script. This script will then:
+For this example report these four items are passed on to a batch or sh file which will in turn execute a python script. This script will then:
 
 - Collect data for the report via REST API using the Project ID and Authorization Token
-- Take the collected data and 
-	- create a simple html document with details about the project - The *"viewable"* file
-- Create a zip file of this html document - The *"downloadable"* file
+- Take this collected data and generated an html document with details about the project inventory
+	- The *"viewable"* file   
+ - Create a zip file of this html document
+	  - The *"downloadable"* file
 - Create a zip file with the viewable file and the downloadable file
 - Upload this combined zip file to Code Insight via REST API
 - Delete the report artifacts that were created as the script ran

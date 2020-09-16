@@ -17,4 +17,4 @@ baseURL=http://localhost:8888
 
 REPORTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-python3 ${REPORTDIR}/create_report.py -pid $projectId -rid $reportId -authToken $authToken -p2id $project2Id -baseURL $baseURL -port
+python3 ${REPORTDIR}/create_report.py -pid $projectId -rid $reportId -authToken $authToken -p2id $project2Id -baseURL $baseURL

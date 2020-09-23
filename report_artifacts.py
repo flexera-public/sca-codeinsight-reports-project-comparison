@@ -97,28 +97,11 @@ def generate_html_report(reportData):
         print("Unable to open %s" %cssFile)
 
     # TODO Add to css file
-    html_ptr.write(" .tr-nomatch { background-color: #FFFFE0;}\n")
+    html_ptr.write(" .tr-notExactMatch { background-color: #F0F0F0;}\n")
     html_ptr.write(" .td-nomatch { color: #F80000;}\n")
+    # To keep the filter button a different color after it was clicked
+    html_ptr.write(".active {  background-color: #89EE46; color: #000000; outline-color: red;}")
 
-    html_ptr.write('''    
-    
-    .page-item.active .page-link {
-        color: #323E48 !important;
-        background-color: #1ED65F !important;
-        border-color: #323E48 !important; 
-    }
-
-    .page-link {
-        color: #323E48 !important;
-        background-color: #fff !important;
-        border: 1px solid #323E48 !important; 
-    }
-
-    .page-link:hover {
-        color: #1ED65F !important;
-        background-color: #323E48 !important;
-        border-color: #323E48 !important; 
-    }''')
     
     html_ptr.write("        </style>\n")  
 
@@ -152,10 +135,22 @@ def generate_html_report(reportData):
     #---------------------------------------------------------------------------------------------------
     html_ptr.write("<!-- BEGIN BODY -->\n")  
 
-    html_ptr.write('''<button id="hideNonExact">Show Common Components</button>''')
-    html_ptr.write('''<button id="hideExact">Show Differences</button>''')
-    
-    html_ptr.write('''<button id="reset">Show All</button>''')
+
+    html_ptr.write('''<div class="btn-toolbar" role="toolbar" aria-label="button toolbar">\n''')
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="common" >''')
+    html_ptr.write('''        <button  type="button" class="btn  btn-revenera-gray" id="hideNonExact">Show Common Components</button>\n''')
+    html_ptr.write('''    </div>\n''')
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="diffs">''')
+    html_ptr.write('''        <button id="hideExact" type="button" class="btn btn-revenera-gray">Show Differences</button>\n''')
+    html_ptr.write('''    </div>\n''')
+    html_ptr.write('''    <div class="btn-group" role="group" aria-label="all">''')
+    html_ptr.write('''         <button id="reset" type="button" class="btn btn-revenera-gray">Show All</button>\n''')
+    html_ptr.write('''    </div>\n''')
+    html_ptr.write('''</div>\n''')
+
+
+    html_ptr.write('''<p>''')
+    html_ptr.write('''<p>''')
 
     html_ptr.write("<table id='comparisonData' class='table table-hover table-bordered table-sm' style='width:90%'>\n")
 
@@ -212,10 +207,11 @@ def generate_html_report(reportData):
         # Is this an exact match between projects?
         if proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_componentForgeName == proj2_componentForgeName:
             matchType = "CVL"
+            html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         else:
             matchType = "CV"
+            html_ptr.write("        <tr class='tr-notExactMatch' matchType='%s'> \n" %matchType)
         
-        html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
         
         if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
@@ -241,26 +237,6 @@ def generate_html_report(reportData):
 
         html_ptr.write("        </tr>\n") 
     html_ptr.write("    </tbody>\n")
-
-    '''
-    html_ptr.write("    <tfoot>\n")
-    html_ptr.write("        <tr>\n") 
-    html_ptr.write("            <th class='text-center'>Component</th>\n") 
-
-    html_ptr.write("            <th class='text-center'>Selected License</th>\n") 
-    html_ptr.write("            <th class='text-center'>Forge</th>\n")
-
-    html_ptr.write("            <th class='text-center'>Selected License</th>\n") 
-    html_ptr.write("            <th class='text-center'>Forge</th>\n")  
-    html_ptr.write("        </tr>\n")
-    
-    html_ptr.write("        <tr>\n")
-    html_ptr.write("            <th class='text-center'>&nbsp</th>\n")   
-    html_ptr.write("            <th colspan='2' class='text-center'>%s</th>\n" %projectNames[0])  
-    html_ptr.write("            <th colspan='2' class='text-center'>%s</th>\n" %projectNames[1]) 
-    html_ptr.write("        </tr>\n")
-    html_ptr.write("    </tfoot>\n")  
-    '''  
 
     html_ptr.write("</table>\n")  
 
@@ -325,6 +301,16 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 table.draw();
             });
+
+
+            $(document).ready(function () {
+                $('button').on('click', function() {
+                $('button').removeClass('active');
+                $(this).addClass('active');
+            });
+            });
+
+
             </script>
 
 

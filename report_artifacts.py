@@ -152,7 +152,7 @@ def generate_html_report(reportData):
     html_ptr.write('''<p>''')
     html_ptr.write('''<p>''')
 
-    html_ptr.write("<table id='comparisonData' class='table table-hover table-bordered table-sm' style='width:90%'>\n")
+    html_ptr.write("<table id='comparisonData' class='table table-hover row-border table-sm' style='width:90%'>\n")
 
     html_ptr.write("<colgroup>\n")
     html_ptr.write("<col span=\"1\" style=\"width: 30%;\">\n")

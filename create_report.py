@@ -38,10 +38,10 @@ logger = logging.getLogger(__name__)
 # Create command line argument options
 parser = argparse.ArgumentParser()
 parser.add_argument('-pid', "--projectID", help="Project ID")
-parser.add_argument('-p2id', "--project2ID", help="Secondary Project ID")
 parser.add_argument("-rid", "--reportID", help="Report ID")
 parser.add_argument("-authToken", "--authToken", help="Code Insight Authorization Token")
 parser.add_argument("-baseURL", "--baseURL", help="Code Insight Core Server Protocol/Domain Name/Port.  i.e. http://localhost:8888 or https://sca.codeinsight.com:8443")
+parser.add_argument("-reportOpts", "--reportOptions", help="Options for report content")
 
 
 #----------------------------------------------------------------------#
@@ -55,19 +55,29 @@ def main():
 	# See what if any arguments were provided
 	args = parser.parse_args()
 	projectID = args.projectID
-	project2ID = args.project2ID
 	reportID = args.reportID
+	reportOptions = args.reportOptions
 	authToken = args.authToken
 	baseURL = args.baseURL
+
+	# Create a dictionary for the report options
+	# since argparse removes quotes json.load won't work
+	# Split and remove the passed {} as well
+	reportOptions = {}
+	for keyValuePair in args.reportOptions[1:-1].split(','):
+		key, value = keyValuePair.split(':')
+		reportOptions[key] = value
+
 	
 	logger.debug("Custom Report Provided Arguments:")	
 	logger.debug("    projectID:  %s" %projectID)	
-	logger.debug("    project2ID:  %s" %project2ID)	
 	logger.debug("    reportID:   %s" %reportID)	
-	logger.debug("    baseURL:  %s" %baseURL)	
+	logger.debug("    reportOptions:  %s" %reportOptions)
+	
+	otherProjectId = reportOptions["otherProjectId"]
 
 	try:
-		reportData = report_data.gather_data_for_report(baseURL, projectID, project2ID, authToken, reportName)
+		reportData = report_data.gather_data_for_report(baseURL, projectID, otherProjectId, authToken, reportName)
 		print("    Report data has been collected")
 	except:
 		print("Error encountered while collecting report data.  Please see log for details")

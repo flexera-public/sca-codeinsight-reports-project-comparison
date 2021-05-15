@@ -39,6 +39,7 @@ def generate_html_report(reportData):
     reportName = reportData["reportName"]
     projectNames  = reportData["projectNames"]
     inventoryData = reportData["inventoryData"]
+    primaryProjectName = projectNames[0]
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
     cssFile =  os.path.join(scriptDirectory, "html-assets/css/revenera_common.css")
@@ -57,7 +58,8 @@ def generate_html_report(reportData):
     # Grab the current date/time for report date stamp
     now = datetime.now().strftime("%B %d, %Y at %H:%M:%S")
 
-    htmlFile = reportName + ".html"
+    htmlFile = primaryProjectName.replace(" - ", "-").replace(" ", "_") + "-" + reportName.replace(" ", "_") + ".html"
+
     logger.debug("htmlFile: %s" %htmlFile)
 
     #---------------------------------------------------------------------------------------------------

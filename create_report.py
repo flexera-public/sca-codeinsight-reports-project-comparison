@@ -13,6 +13,7 @@ import logging
 import argparse
 import zipfile
 import os
+import json
 
 import _version
 import report_data
@@ -60,20 +61,17 @@ def main():
 	authToken = args.authToken
 	baseURL = args.baseURL
 
-	# Create a dictionary for the report options
-	# since argparse removes quotes json.load won't work
-	# Split and remove the passed {} as well
-	reportOptions = {}
-	for keyValuePair in args.reportOptions[1:-1].split(','):
-		key, value = keyValuePair.split(':')
-		reportOptions[key] = value
+	# Based on how the shell pass the arguemnts clean up the options if on a linux system:w
+	if sys.platform.startswith('linux'):
+		reportOptions = reportOptions.replace('""', '"')[1:-1]
 
+	reportOptions = json.loads(reportOptions)
 	
 	logger.debug("Custom Report Provided Arguments:")	
 	logger.debug("    projectID:  %s" %projectID)	
 	logger.debug("    reportID:   %s" %reportID)	
 	logger.debug("    reportOptions:  %s" %reportOptions)
-	
+
 	otherProjectId = reportOptions["otherProjectId"]
 
 	try:

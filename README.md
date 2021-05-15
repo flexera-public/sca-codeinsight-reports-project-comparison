@@ -1,6 +1,12 @@
 # sca-codeinsight-reports-project-comparison
 
-The sca-codeinsight-reports-project-comparison repository is a example report for Revenera's Code Insight product. That allows a user to compare the inventory between two differnt projects.
+The sca-codeinsight-reports-project-comparison repository is a example report for Revenera's Code Insight product. That allows a user to compare the inventory between two different projects.
+
+
+This repository utilizes the following via CDN for the creation of the report artifacts.
+- [Bootstrap](https://getbootstrap.com/)
+- [DataTables](https://datatables.net/)
+
 
 ## Prerequisites
 
@@ -9,6 +15,7 @@ The sca-codeinsight-reports-project-comparison repository is a example report fo
 |Repository Tag|Minimum Code Insight Release  |
 |--|--|
 |1.0.x |2020R3  |
+|1.1.x |2021R2  |
 
 
 **Submodule Repositories**
@@ -32,9 +39,22 @@ The [create_report.sh](create_report.sh) or [create_report.bat](create_report.ba
 
 For registraion purpsoses update the **baseURL** and **adminAuthToken** values within [registraion.py](registration.py) to reflect the correct values to allow the report itself to be registerd on the Code Insight server.    
 
+### Registering the Report
+
+Prior to being able to call the script directly from within Code Insight it must be registered. The registration.py file can be used to directly register the report once the contents of this repository have been copied into the custom_report_script folder at the base Code Insight installation directory.
+
+To register this report:
+
+    python registration.py -reg
+
+
+To unregister this report:
+
+    python registration.py -unreg
+
 ## Usage
 
-This report is executed directly from within Revenera's Code Insight product. From the summary page of each Code Insight project it is possible to *generate* the **Project Comparison Report** via the Custom Report Framework.  Once this report is selected the second project for comparision can be selected
+This report is executed directly from within Revenera's Code Insight product. From the project reports tab of each Code Insight project it is possible to *generate* the **Project Comparison Report** via the Custom Report Framework.  Once this report is selected the second project for comparision can be selected
 
 The Code Insight Custom Report Framework will provide the following to the custom report when initiated:
 
@@ -55,18 +75,6 @@ For this example report these four items are passed on to a batch or sh file whi
 - Delete the report artifacts that were created as the script ran
 
   
-### Registering the Report
-
-Prior to being able to call the script directly from within Code Insight it must be registered. The registration.py file can be used to directly register the report once the contents of this repository have been copied into the custom_report_script folder at the base Code Insight installation directory.
-
-To register this report:
-
-    python registration.py -reg
-
-
-To unregister this report:
-
-    python registration.py -unreg
 
 ## License
 

@@ -1,6 +1,8 @@
+venv
+.vscode
 *.log
 *.pyc
 *.html
 *.zip
-Template Example Report*
+
 

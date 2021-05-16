@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.1] - 2021-05-XX
+## [1.1.1] - 2021-05-16
 - Update for 2021R2 Release
 - Other project ID as part of report options
 - Artifact names based on project name

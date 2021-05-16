@@ -22,6 +22,7 @@ import CodeInsight_RESTAPIs.reports.delete_report
 #  Report Details
 reportName = "Project Comparison Report"  # What is the name to be shown within Code Insight?
 enableProjectPickerValue = "true"   # true if a second project can be used within this report
+reportOptions = [] # Placeholder in case other options are added beyond second project
 
 #####################################################################################################
 #  Code Insight System Information
@@ -109,7 +110,7 @@ def register_custom_reports():
     print("Attempting to register %s with a report order of %s" %(reportName, reportOrder))
 
     try:
-        reportID = CodeInsight_RESTAPIs.reports.create_report.register_report(reportName, reportPath, reportOrder, enableProjectPickerValue, baseURL, adminAuthToken)
+        reportID = CodeInsight_RESTAPIs.reports.create_report.register_report(reportName, reportPath, reportOrder, enableProjectPickerValue, reportOptions, baseURL, adminAuthToken)
         print("%s has been registed with a report ID of %s" %(reportName, reportID))
         logger.info("%s has been registed with a report ID of %s" %(reportName, reportID))
     except:

@@ -17,6 +17,9 @@ This repository utilizes the following via CDN for the creation of the report ar
 |1.0.x |2020R3  |
 |1.1.x |2021R2  |
 
+**Repository Cloning**
+
+This repository should be cloned directly into the **$CODEINSIGHT_INSTALLDIR/custom_report_scripts** directory. If no prior custom reports has been installed, this directory may need to be created prior to cloning.
 
 **Submodule Repositories**
 
@@ -27,7 +30,7 @@ This repository contains two submodules pointing to other git repos for code tha
 
 **Python Requirements**
 
-This repository requires the python requests module to interact with the Code Insight REST APIs.  To install this as well as the the modules it depends on the [requirements.txt](requirements.txt) file has been supplied and can be used as follows.
+The required python modules can be installed with the use of the [requirements.txt](requirements.txt) file which can be loaded via.
 
     pip install -r requirements.txt    
 
@@ -37,7 +40,7 @@ There are two locations that require updates to provide the report scripts detai
 
 The [create_report.sh](create_report.sh) or [create_report.bat](create_report.bat) file contains a **baseURL** value that should be updated to allow for project and inventory links to point to the correct system. 
 
-For registration purposes update the **baseURL** and **adminAuthToken** values within [registration.py](registration.py) to reflect the correct values to allow the report itself to be registered on the Code Insight server. These values can also be stored in **common_config.json** that resides directly within the custom_report_scripts folder within the Code Insight installation.  This file can be shared for all reports that support it.
+For registration purposes, update the **baseURL** and **adminAuthToken** values within [registration.py](registration.py) to reflect the correct values to allow the report itself to be registered on the Code Insight server.   These values can also be added to  **$CODEINSIGHT_INSTALLDIR/custom_report_scripts/common_config.json**  which will be shared among all custom reports that support the common registration config file.
   
 The contents of **common_config.json** should resemble the following:
 
@@ -48,7 +51,7 @@ The contents of **common_config.json** should resemble the following:
 
 ### Registering the Report
 
-Prior to being able to call the script directly from within Code Insight it must be registered. The registration.py file can be used to directly register the report once the contents of this repository have been copied into the custom_report_script folder at the base Code Insight installation directory.
+Prior to being able to call the script directly from within Code Insight it must be registered. The [registration.py](registration.py) file can be used to directly register the report once the contents of this repository have been copied into the custom_report_script folder at the base Code Insight installation directory.
 
 To register this report:
 

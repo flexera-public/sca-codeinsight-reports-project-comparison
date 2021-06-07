@@ -64,6 +64,7 @@ def gather_data_for_report(baseURL, projectID, project2ID, authToken, reportName
     reportData = {}
     reportData["reportName"] = reportName
     reportData["projectNames"] = projectNames
+    reportData["projectID"] = projectID
     reportData["inventoryData"] = inventoryData
 
     logger.info("Exiting gather_data_for_report")

@@ -38,6 +38,8 @@ def generate_html_report(reportData):
 
     reportName = reportData["reportName"]
     projectNames  = reportData["projectNames"]
+    projectID = reportData["projectID"] 
+    fileNameTimeStamp = reportData["fileNameTimeStamp"] 
     inventoryData = reportData["inventoryData"]
     primaryProjectName = projectNames[0]
     
@@ -58,7 +60,7 @@ def generate_html_report(reportData):
     # Grab the current date/time for report date stamp
     now = datetime.now().strftime("%B %d, %Y at %H:%M:%S")
 
-    htmlFile = primaryProjectName.replace(" - ", "-").replace(" ", "_") + "-" + reportName.replace(" ", "_") + ".html"
+    htmlFile = reportName.replace(" ", "_") + "-" + str(projectID)  + "-" + fileNameTimeStamp + ".html"
 
     logger.debug("htmlFile: %s" %htmlFile)
 
@@ -244,7 +246,7 @@ def generate_html_report(reportData):
     #---------------------------------------------------------------------------------------------------
     html_ptr.write("<!-- BEGIN FOOTER -->\n")
     html_ptr.write("<div class='report-footer'>\n")
-    html_ptr.write("  <div style='float:left'>&copy; 2020 Revenera</div>\n")
+    html_ptr.write("  <div style='float:left'>&copy; %s Flexera</div>\n" %fileNameTimeStamp[0:4])
     html_ptr.write("  <div style='float:right'>Generated on %s</div>\n" %now)
     html_ptr.write("</div>\n")
     html_ptr.write("<!-- END FOOTER -->\n")  

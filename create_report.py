@@ -31,7 +31,7 @@ else:
 
 propertiesFile = "../server_properties.json"  # Created by installer or manually
 propertiesFile = logfileName = os.path.dirname(os.path.realpath(__file__)) + "/" +  propertiesFile
-logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_vulnerabilities_report.log"
+logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_comparison_report.log"
 
 ###################################################################################
 #  Set up logging handler to allow for different levels of logging to be capture

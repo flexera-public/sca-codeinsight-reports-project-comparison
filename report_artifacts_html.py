@@ -12,6 +12,8 @@ import os
 import base64
 from datetime import datetime
 
+import _version
+
 logger = logging.getLogger(__name__)
 
 #------------------------------------------------------------------#
@@ -19,9 +21,9 @@ def generate_html_report(reportData):
     logger.info("    Entering generate_html_report")
 
     reportName = reportData["reportName"]
-    projectNames  = reportData["projectNames"]
-    projectID = reportData["projectID"] 
-    fileNameTimeStamp = reportData["fileNameTimeStamp"] 
+    projectNames  = list(reportData["projectNames"].values())
+    reportFileNameBase = reportData["reportFileNameBase"]
+    reportTimeStamp =  reportData["reportTimeStamp"] 
     inventoryData = reportData["inventoryData"]
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
@@ -41,7 +43,7 @@ def generate_html_report(reportData):
     # Grab the current date/time for report date stamp
     now = datetime.now().strftime("%B %d, %Y at %H:%M:%S")
 
-    htmlFile = reportName.replace(" ", "_") + "-" + str(projectID)  + "-" + fileNameTimeStamp + ".html"
+    htmlFile = reportFileNameBase + ".html"
 
     logger.debug("htmlFile: %s" %htmlFile)
 
@@ -227,8 +229,9 @@ def generate_html_report(reportData):
     #---------------------------------------------------------------------------------------------------
     html_ptr.write("<!-- BEGIN FOOTER -->\n")
     html_ptr.write("<div class='report-footer'>\n")
-    html_ptr.write("  <div style='float:left'>&copy; %s Flexera</div>\n" %fileNameTimeStamp[0:4])
-    html_ptr.write("  <div style='float:right'>Generated on %s</div>\n" %now)
+    html_ptr.write("  <div style='float:right'>Generated on %s</div>\n" %reportTimeStamp)
+    html_ptr.write("<br>\n")
+    html_ptr.write("  <div style='float:right'>Report Version: %s</div>\n" %_version.__version__)
     html_ptr.write("</div>\n")
     html_ptr.write("<!-- END FOOTER -->\n")  
 

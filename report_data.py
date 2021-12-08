@@ -21,7 +21,7 @@ def gather_data_for_report(baseURL, projectID, project2ID, authToken, reportName
     # Create a dictionary containing the inveotry data using name/version strings as keys
     inventoryData = {}
     # Create a list to contain the project names
-    projectNames = []
+    projectNames = {}
 
     for project in [projectID, project2ID]:
         # Get details for  project
@@ -33,7 +33,7 @@ def gather_data_for_report(baseURL, projectID, project2ID, authToken, reportName
             return -1
 
         projectName = projectInventoryResponse["projectName"]
-        projectNames.append(projectName)
+        projectNames[project] = projectName
 
         inventoryItems = projectInventoryResponse["inventoryItems"]
 
@@ -59,7 +59,7 @@ def gather_data_for_report(baseURL, projectID, project2ID, authToken, reportName
                                                     "selectedLicenseName" : selectedLicenseName,
                                                     "componentForgeName" : componentForgeName
                                                 }
-            
+
 
     reportData = {}
     reportData["reportName"] = reportName

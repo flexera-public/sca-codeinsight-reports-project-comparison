@@ -29,7 +29,9 @@ if sys.version_info <= (3, 5):
 else:
     pass
 
-logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_comparison_report.log"
+propertiesFile = "../server_properties.json"  # Created by installer or manually
+propertiesFile = logfileName = os.path.dirname(os.path.realpath(__file__)) + "/" +  propertiesFile
+logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_vulnerabilities_report.log"
 
 ###################################################################################
 #  Set up logging handler to allow for different levels of logging to be capture
@@ -45,7 +47,6 @@ parser.add_argument("-authToken", "--authToken", help="Code Insight Authorizatio
 parser.add_argument("-baseURL", "--baseURL", help="Code Insight Core Server Protocol/Domain Name/Port.  i.e. http://localhost:8888 or https://sca.codeinsight.com:8443")
 parser.add_argument("-reportOpts", "--reportOptions", help="Options for report content")
 
-
 #----------------------------------------------------------------------#
 def main():
 
@@ -54,13 +55,29 @@ def main():
 	logger.info("Creating %s - %s" %(reportName, _version.__version__))
 	print("Creating %s - %s" %(reportName, _version.__version__))
 
+    #####################################################################################################
+    #  Code Insight System Information
+    #  Pull the base URL from the same file that the installer is creating
+	if os.path.exists(propertiesFile):
+		try:
+			file_ptr = open(propertiesFile, "r")
+			configData = json.load(file_ptr)
+			baseURL = configData["core.server.url"]
+			file_ptr.close()
+			logger.info("Using baseURL from properties file: %s" %propertiesFile)
+		except:
+			logger.error("Unable to open properties file: %s" %propertiesFile)
+	else:
+		baseURL = "http://localhost:8888"   # Required if the core.server.properties files is not used
+		logger.info("Using baseURL from create_report.py")
+
+
 	# See what if any arguments were provided
 	args = parser.parse_args()
 	projectID = args.projectID
 	reportID = args.reportID
 	reportOptions = args.reportOptions
 	authToken = args.authToken
-	baseURL = args.baseURL
 
 	fileNameTimeStamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 

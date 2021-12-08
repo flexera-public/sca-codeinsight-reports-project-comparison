@@ -20,35 +20,54 @@ import CodeInsight_RESTAPIs.reports.create_report
 import CodeInsight_RESTAPIs.reports.delete_report
 import CodeInsight_RESTAPIs.reports.update_report
 
-#####################################################################################################
-#  Report Details
-reportName = "Project Comparison Report"  # What is the name to be shown within Code Insight?
-enableProjectPickerValue = "true"   # true if a second project can be used within this report
-reportOptions = [] # Placeholder in case other options are added beyond second project
+###################################################################################
+# Test the version of python to make sure it's at least the version the script
+# was tested on, otherwise there could be unexpected results
+if sys.version_info <= (3, 5):
+    raise Exception("The current version of Python is less than 3.5 which is unsupported.\n Script created/tested against python version 3.8.1. ")
+else:
+    pass
+
+propertiesFile = "../server_properties.json"  # Created by installer or manually
+logfileName = "_custom_report_registration.log"
+
+###################################################################################
+#  Set up logging handler to allow for different levels of logging to be capture
+logging.basicConfig(format='%(asctime)s,%(msecs)-3d  %(levelname)-8s [%(filename)-25s:%(lineno)-4d]  %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', filename=logfileName, filemode='w',level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logging.getLogger("urllib3").setLevel(logging.WARNING)  # Disable logging for requests module
 
 #####################################################################################################
 #  Code Insight System Information
 #  See if there is a common file for config details
-try:
-    ptr = open("../common_config.json")
-    configData = json.load(ptr)
-    baseURL = configData["baseURL"]
-    adminAuthToken = configData["adminAuthToken"]
-    ptr.close()
-except:
+if os.path.exists(propertiesFile):
+    try:
+        file_ptr = open(propertiesFile, "r")
+        configData = json.load(file_ptr)
+        baseURL = configData["core.server.url"]
+        adminAuthToken = configData["core.server.token"]
+        file_ptr.close()
+        logger.info("Loading config data from properties file: %s" %propertiesFile)
+    except:
+        logger.error("Unable to open properties file: %s" %propertiesFile)
+else:
+    logger.info("Using config data from create_report.py")
     baseURL = "UPDATEME" # i.e. http://localhost:8888 or https://sca.mycodeinsight.com:8443 
     adminAuthToken = "UPDATEME"
 
 #####################################################################################################
 # Quick sanity check
 if adminAuthToken == "UPDATEME" or baseURL == "UPDATEME":
+    logger.error("Make sure baseURL and the admin authorization token have been updated within registration.py")
     print("Make sure baseURL and the admin authorization token have been updated within registration.py")
     sys.exit()
 
 #####################################################################################################
-# Get the directory name in order to register the script
-# this will be based on the git repo name is some cases
-currentFolderName = os.path.basename(os.getcwd())
+#  Report Details
+reportName = "Project Comparison Report"  # What is the name to be shown within Code Insight?
+enableProjectPickerValue = "true"   # true if a second project can be used within this report
+reportOptions = [] # Placeholder in case other options are added beyond second project
+
 
 #####################################################################################################
 # The path with the custom_report_scripts folder to called via the framework
@@ -58,6 +77,13 @@ elif sys.platform == "win32":
     reportHelperScript = "create_report.bat"
 else:
     sys.exit("No script file for operating system")
+
+
+
+#####################################################################################################
+# Get the directory name in order to register the script
+# this will be based on the git repo name is some cases
+currentFolderName = os.path.basename(os.getcwd())
 
 reportPath = currentFolderName + "/" + reportHelperScript     
 

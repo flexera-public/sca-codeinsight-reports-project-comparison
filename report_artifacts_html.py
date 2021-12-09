@@ -37,7 +37,7 @@ def generate_html_report(reportData):
 
     htmlFile = reportFileNameBase + ".html"
 
-    logger.debug("htmlFile: %s" %htmlFile)
+    logger.debug("        htmlFile: %s" %htmlFile)
 
     #---------------------------------------------------------------------------------------------------
     # Create a simple HTML file to display
@@ -67,7 +67,7 @@ def generate_html_report(reportData):
     # Add the contents of the css file to the head block
     try:
         f_ptr = open(cssFile)
-        logger.debug("Adding css file details")
+        logger.debug("        Adding css file details")
         for line in f_ptr:
             html_ptr.write("            %s" %line)
         f_ptr.close()

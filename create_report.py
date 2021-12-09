@@ -32,7 +32,7 @@ else:
 
 propertiesFile = "../server_properties.json"  # Created by installer or manually
 propertiesFile = logfileName = os.path.dirname(os.path.realpath(__file__)) + "/" +  propertiesFile
-logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_comparison_report.log"
+logfileName = os.path.join(os.path.dirname(os.path.realpath(__file__)),"_project_comparison_report.log")
 
 ###################################################################################
 #  Set up logging handler to allow for different levels of logging to be capture
@@ -55,6 +55,7 @@ def main():
 	reportName = "Project Comparison Report"
 	logger.info("Creating %s - %s" %(reportName, _version.__version__))
 	print("Creating %s - %s" %(reportName, _version.__version__))
+	print("    Logfile: %s" %(logfileName))
 
     #####################################################################################################
     #  Code Insight System Information

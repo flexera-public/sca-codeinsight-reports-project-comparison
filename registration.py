@@ -78,36 +78,17 @@ elif sys.platform == "win32":
 else:
     sys.exit("No script file for operating system")
 
-
-
 #####################################################################################################
 # Get the directory name in order to register the script
 # this will be based on the git repo name is some cases
 currentFolderName = os.path.basename(os.getcwd())
-
 reportPath = currentFolderName + "/" + reportHelperScript     
-
-###################################################################################
-# Test the version of python to make sure it's at least the version the script
-# was tested on, otherwise there could be unexpected results
-if sys.version_info <= (3, 5):
-    raise Exception("The current version of Python is less than 3.5 which is unsupported.\n Script created/tested against python version 3.8.1. ")
-else:
-    pass
-
-###################################################################################
-#  Set up logging handler to allow for different levels of logging to be capture
-logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S',
-
-filename="_custom_report_registration.log", filemode='w',level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 # Create command line argument options
 parser = argparse.ArgumentParser()
 parser.add_argument('-reg', "--register", action='store_true', help="Register custom reports")
 parser.add_argument("-unreg", "--unregister", action='store_true', help="Unegister custom reports")
 parser.add_argument("-update", "--update", action='store_true', help="Update a registered custom reports")
-
 
 #----------------------------------------------------------------------#
 def main():

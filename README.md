@@ -1,6 +1,6 @@
 # sca-codeinsight-reports-project-comparison
 
-The sca-codeinsight-reports-project-comparison repository is a example report for Revenera's Code Insight product. That allows a user to compare the inventory between two different projects.
+The `sca-codeinsight-reports-project-comparison` repository is a example report for Revenera's Code Insight product. That allows a user to compare the inventory between two different projects.
 
 
 This repository utilizes the following via CDN for the creation of the report artifacts.
@@ -23,10 +23,17 @@ This repository should be cloned directly into the **$CODEINSIGHT_INSTALLDIR/cus
 
 **Submodule Repositories**
 
-This repository contains two submodules pointing to other git repos for code that can be in common to multiple projects.  After the initial clone of sca-codeinsight-reports-project-comparison you will need to enter the cloned directory and link and pull down the necessary code
+This repository contains two submodule repositories for code that is used across multiple projects.  There are two options for cloning this repository and ensuring that the required submodules are also installed.
 
-    git submodule init
-    git submodule update
+Clone the report repository use the recursive option to automatically pull in the required submodules
+
+	git clone --recursive
+
+ Alternatively clone the report repository and then clone the submodules separately by entering the cloned directory and then pulling down the necessary submodules code via   
+
+	git submodule init
+
+	git submodule update
 
 **Python Requirements**
 
@@ -34,20 +41,23 @@ The required python modules can be installed with the use of the [requirements.t
 
     pip install -r requirements.txt    
 
-## Required Configuration
+## Configuration and Report Registration
+ 
+For registration purposes the file **server_properties.json** should be created and located in the **$CODEINSIGHT_INSTALLDIR/custom_report_scripts/** directory.  This file contains a json with information required to register the report within Code Insight as shown  here:
 
-There are two locations that require updates to provide the report scripts details about the host system.
+>     {
+>         "core.server.url": "http://localhost:8888" ,
+>         "core.server.token" : "Admin authorization token from Code Insight"
+>     }
 
-The [create_report.sh](create_report.sh) or [create_report.bat](create_report.bat) file contains a **baseURL** value that should be updated to allow for project and inventory links to point to the correct system. 
+The value for core.server.url is also used within [create_report.py](create_report.py) for any project or inventory based links back to the Code Insight server within a generated report.
 
-For registration purposes, update the **baseURL** and **adminAuthToken** values within [registration.py](registration.py) to reflect the correct values to allow the report itself to be registered on the Code Insight server.   These values can also be added to  **$CODEINSIGHT_INSTALLDIR/custom_report_scripts/common_config.json**  which will be shared among all custom reports that support the common registration config file.
-  
-The contents of **common_config.json** should resemble the following:
+If the common **server_properties.json** files is not used then the information the the following files will need to be updated:
 
-    {
-        "baseURL": "http://localhost:8888" ,
-        "adminAuthToken" : "Token from Code Insight"
-    } 
+[registration.py](registration.py)  -  Update the **baseURL** and **adminAuthToken** values. These settings allow the report itself to be registered on the Code Insight server.
+
+[create_report.py](create_report.py)  -  Update the **baseURL** value. This URL is used for links within the reports.
+
 
 ### Registering the Report
 

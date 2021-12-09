@@ -36,8 +36,9 @@ logfileName = os.path.dirname(os.path.realpath(__file__)) + "/_project_compariso
 
 ###################################################################################
 #  Set up logging handler to allow for different levels of logging to be capture
-logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', filename=logfileName, filemode='w',level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s,%(msecs)-3d  %(levelname)-8s [%(filename)-30s:%(lineno)-4d]  %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', filename=logfileName, filemode='w',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logging.getLogger("urllib3").setLevel(logging.WARNING)  # Disable logging for requests module
 
 ####################################################################################
 # Create command line argument options
@@ -52,7 +53,6 @@ parser.add_argument("-reportOpts", "--reportOptions", help="Options for report c
 def main():
 
 	reportName = "Project Comparison Report"
-
 	logger.info("Creating %s - %s" %(reportName, _version.__version__))
 	print("Creating %s - %s" %(reportName, _version.__version__))
 

@@ -10,7 +10,6 @@ File : report_artifacts_html.py
 import logging
 import os
 import base64
-from datetime import datetime
 
 import _version
 
@@ -30,18 +29,11 @@ def generate_html_report(reportData):
     cssFile =  os.path.join(scriptDirectory, "report_branding/css/revenera_common.css")
     logoImageFile =  os.path.join(scriptDirectory, "report_branding/images/logo_reversed.svg")
     iconFile =  os.path.join(scriptDirectory, "report_branding/images/favicon-revenera.ico")
-    logger.debug("cssFile: %s" %cssFile)
-    logger.debug("imageFile: %s" %logoImageFile)
-    logger.debug("iconFile: %s" %iconFile)
-
 
     #########################################################
     #  Encode the image files
     encodedLogoImage = encodeImage(logoImageFile)
     encodedfaviconImage = encodeImage(iconFile)
-
-    # Grab the current date/time for report date stamp
-    now = datetime.now().strftime("%B %d, %Y at %H:%M:%S")
 
     htmlFile = reportFileNameBase + ".html"
 
@@ -310,7 +302,6 @@ def encodeImage(imageFile):
     # Create base64 variable for branding image
     try:
         with open(imageFile,"rb") as image:
-            logger.debug("Encoding image: %s" %imageFile)
             encodedImage = base64.b64encode(image.read())
             return encodedImage
     except:

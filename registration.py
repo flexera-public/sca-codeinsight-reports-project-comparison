@@ -44,22 +44,38 @@ if os.path.exists(propertiesFile):
     try:
         file_ptr = open(propertiesFile, "r")
         configData = json.load(file_ptr)
-        baseURL = configData["core.server.url"]
-        adminAuthToken = configData["core.server.token"]
         file_ptr.close()
         logger.info("Loading config data from properties file: %s" %propertiesFile)
+        print("Loading config data from properties file: %s" %propertiesFile)
     except:
         logger.error("Unable to open properties file: %s" %propertiesFile)
+        print("Unable to open properties file: %s" %propertiesFile)
 else:
     logger.info("Using config data from create_report.py")
     baseURL = "UPDATEME" # i.e. http://localhost:8888 or https://sca.mycodeinsight.com:8443 
     adminAuthToken = "UPDATEME"
 
+# Does the server URL value reside in the file?
+try:
+    baseURL = configData["core.server.url"]
+except:
+    logger.error("    Unable to open detemine core.server.url value from file: %s" %propertiesFile)
+    print("    Unable to open detemine core.server.url value from file: %s" %propertiesFile)
+    baseURL = "UPDATEME"
+# Does the admin token value reside in the file?
+try:
+    adminAuthToken = configData["core.server.token"]
+except:
+    logger.error("    Unable to open detemine core.server.token value from file: %s" %propertiesFile)
+    print("    Unable to open detemine core.server.token value from file: %s" %propertiesFile)
+    adminAuthToken = "UPDATEME"
+
+
 #####################################################################################################
 # Quick sanity check
 if adminAuthToken == "UPDATEME" or baseURL == "UPDATEME":
-    logger.error("Make sure baseURL and the admin authorization token have been updated within registration.py")
-    print("Make sure baseURL and the admin authorization token have been updated within registration.py")
+    logger.error("    Make sure baseURL and the admin authorization token have been updated within %s or directly within registration.py" %propertiesFile)
+    print("    Make sure baseURL and the admin authorization token have been updated within %s or directly within registration.py" %propertiesFile)
     sys.exit()
 
 #####################################################################################################
@@ -68,6 +84,16 @@ reportName = "Project Comparison Report"  # What is the name to be shown within 
 enableProjectPickerValue = "true"   # true if a second project can be used within this report
 reportOptions = [] # Placeholder in case other options are added beyond second project
 
+#
+reportOption = {}
+reportOption["name"] = "includeChildProjects"
+reportOption["label"] = "Include child project data? (True/False)"
+reportOption["description"] = "Should the report compare data from child projects? <b>(True/False)</b>"
+reportOption["type"] = "string"
+reportOption["defaultValue"] = "True"
+reportOption["required"] = "true"
+reportOption["order"] = "1"
+reportOptions.append(reportOption)
 
 #####################################################################################################
 # The path with the custom_report_scripts folder to called via the framework

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-05-12
+### Added
+- Support project hierarchy comparisons
+
 ## [1.1.6] - 2022-02-10
 ### Added
 - Support for self signed certificates

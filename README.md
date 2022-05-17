@@ -6,7 +6,7 @@ The `sca-codeinsight-reports-project-comparison` repository is a example report 
 This repository utilizes the following via CDN for the creation of the report artifacts.
 - [Bootstrap](https://getbootstrap.com/)
 - [DataTables](https://datatables.net/)
-
+- [jsTree](https://www.jstree.com/)
 
 ## Prerequisites
 
@@ -16,6 +16,7 @@ This repository utilizes the following via CDN for the creation of the report ar
 |--|--|
 |1.0.x |2020R3  |
 |1.1.x |2021R2  |
+|2.0.x |2021R2  |
 
 **Repository Cloning**
 
@@ -78,14 +79,19 @@ To update this report configuration:
 
 ## Usage
 
-This report is executed directly from within Revenera's Code Insight product. From the project reports tab of each Code Insight project it is possible to *generate* the **Project Comparison Report** via the Custom Report Framework.  Once this report is selected the second project for comparision can be selected
+This report is executed directly from within Revenera's Code Insight product. From the project reports tab of each Code Insight project it is possible to *generate* the **Project Comparison Report** via the Custom Report Framework.  
+
+The following report options can be set once the report generation has been initiated:
+
+- Including child projects (True/False) - Determine if child project data will be included or not.
+- Project name for comparison
 
 The Code Insight Custom Report Framework will provide the following to the custom report when initiated:
 
 - Project ID
 - Report ID
 - Authorization Token
-- Secondary Project ID
+- Report options
 
 For this example report these four items are passed on to a batch or sh file which will in turn execute a python script. This script will then:
 

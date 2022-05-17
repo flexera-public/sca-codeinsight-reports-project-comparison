@@ -98,16 +98,14 @@ def main():
 		reportOptions = reportOptions.replace('""', '"')[1:-1]
 
 	reportOptions = json.loads(reportOptions)
+	reportOptions = verifyOptions(reportOptions) 
 	
 	logger.debug("Custom Report Provided Arguments:")	
 	logger.debug("    projectID:  %s" %projectID)	
 	logger.debug("    reportID:   %s" %reportID)	
 	logger.debug("    reportOptions:  %s" %reportOptions)
 
-	otherProjectId = reportOptions["otherProjectId"]
-
-
-	reportData = report_data.gather_data_for_report(baseURL, projectID, otherProjectId, authToken, reportName)
+	reportData = report_data.gather_data_for_report(baseURL, projectID, reportOptions, authToken, reportName)
 	print("    Report data has been collected")
 	
 	projectNames = reportData["projectNames"]
@@ -141,6 +139,32 @@ def main():
 
 	logger.info("Completed creating %s" %reportName)
 	print("Completed creating %s" %reportName)
+
+
+#----------------------------------------------------------------------# 
+def verifyOptions(reportOptions):
+	'''
+	Expected Options for report:
+		includeChildProjects - True/False
+	'''
+	reportOptions["errorMsg"] = []
+	trueOptions = ["true", "t", "yes", "y"]
+	falseOptions = ["false", "f", "no", "n"]
+
+	includeChildProjects = reportOptions["includeChildProjects"]
+
+	if includeChildProjects.lower() in trueOptions:
+		reportOptions["includeChildProjects"] = "true"
+	elif includeChildProjects.lower() in falseOptions:
+		reportOptions["includeChildProjects"] = "false"
+	else:
+		reportOptions["errorMsg"].append("Invalid option for including child projects: <b>%s</b>.  Valid options are <b>True/False</b>" %includeChildProjects)
+
+	if not reportOptions["errorMsg"]:
+		reportOptions.pop('errorMsg', None)
+
+	return reportOptions
+
 
 #---------------------------------------------------------------------#
 def create_report_zipfile(reportOutputs, reportFileNameBase):

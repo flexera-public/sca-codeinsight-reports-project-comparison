@@ -25,6 +25,8 @@ def generate_html_report(reportData):
     reportTimeStamp =  reportData["reportTimeStamp"] 
     inventoryData = reportData["inventoryData"]
     projectData = reportData["projectData"]
+    primaryProjectID = reportData["projectID"]
+    secondaryProjectID = reportData["secondaryProjectID"]
     largestHierachy = reportData["largestHierachy"]
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
@@ -99,7 +101,7 @@ def generate_html_report(reportData):
     html_ptr.write("<!-- BEGIN HEADER -->\n")
     html_ptr.write("<div class='header'>\n")
     html_ptr.write("  <div class='logo'>\n")
-    html_ptr.write("    <img src='data:image/svg+xml;base64,{}' style='width: 400px;'>\n".format(encodedLogoImage.decode('utf-8')))
+    html_ptr.write("    <img src='data:image/svg+xml;base64,{}' style='width: 400px; height: 100px'>\n".format(encodedLogoImage.decode('utf-8')))
     html_ptr.write("  </div>\n")
     html_ptr.write("<div class='report-title'>%s</div>\n" %reportName)
     html_ptr.write("</div>\n")
@@ -289,8 +291,8 @@ def generate_html_report(reportData):
 
     if largestHierachy > 1:
         # Add the js for the project summary stacked bar charts
-        generate_project_hierarchy_tree(html_ptr, projectData["31"]["projectList"], "project_hierarchy1")
-        generate_project_hierarchy_tree(html_ptr, projectData["27"]["projectList"], "project_hierarchy2")
+        generate_project_hierarchy_tree(html_ptr, projectData[primaryProjectID]["projectList"], "project_hierarchy1")
+        generate_project_hierarchy_tree(html_ptr, projectData[secondaryProjectID]["projectList"], "project_hierarchy2")
     
 
     html_ptr.write('''

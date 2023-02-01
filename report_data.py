@@ -112,6 +112,7 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
     reportData["projectData"] = projectData
     reportData["projectNames"] = projectNames
     reportData["projectID"] = primaryProjectID
+    reportData["secondaryProjectID"] = secondaryProjectID
     reportData["inventoryData"] = inventoryData
     reportData["largestHierachy"] = largestHierachy
 

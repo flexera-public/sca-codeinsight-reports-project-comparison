@@ -9,21 +9,21 @@ File : report_data.py
 '''
 
 import logging
-import CodeInsight_RESTAPIs.project.get_project_inventory
-import CodeInsight_RESTAPIs.project.get_child_projects
+import common.project_heirarchy
+import common.api.project.get_project_inventory
 
 logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------#
-def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, reportName):
+def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
     logger.info("Entering gather_data_for_report")
+
+    reportOptions = reportData["reportOptions"]
 
     # Parse report options
     includeChildProjects = reportOptions["includeChildProjects"]  # True/False
     secondaryProjectID = reportOptions["otherProjectId"]
 
-    
-    projectList = {} # Dictionary of lists to hold parent/child details for report
     inventoryData = {} # Create a dictionary containing the inveotry data using name/version strings as keys
     projectNames = {} # Create a list to contain the project names
     projectData = {}
@@ -32,26 +32,10 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
     for projectID in [primaryProjectID, secondaryProjectID]:
         projectList=[]
         projectData[projectID] = {}
-
         
         # Get the list of parent/child projects start at the base project
-        projectHierarchy = CodeInsight_RESTAPIs.project.get_child_projects.get_child_projects_recursively(baseURL, projectID, authToken)
-        topLevelProjectName = projectHierarchy["name"]
-
-        # Create a list of project data sorted by the project name at each level for report display  
-        # Add details for the parent node
-        nodeDetails = {}
-        nodeDetails["parent"] = "#"  # The root node
-        nodeDetails["projectName"] = projectHierarchy["name"]
-        nodeDetails["projectID"] = projectHierarchy["id"]
-        nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(projectHierarchy["id"]) + "&tab=projectInventory"
-
-        projectList.append(nodeDetails)
-
-        if includeChildProjects == "true":
-            projectList = create_project_hierarchy(projectHierarchy, projectHierarchy["id"], projectList, baseURL)
-        else:
-            logger.debug("Child hierarchy disabled")
+        projectList = common.project_heirarchy.create_project_heirarchy(baseURL, authToken, projectID, includeChildProjects)
+        topLevelProjectName = projectList[0]["projectName"]
 
         projectData[projectID]["projectList"] = projectList
 
@@ -69,7 +53,7 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
 
             # Get details for  project
             try:
-                projectInventoryResponse = CodeInsight_RESTAPIs.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
+                projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
             except:
                 logger.error("    No project ineventory response!")
                 print("No project inventory response.")
@@ -80,7 +64,6 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
             projectData[projectID]["projectName"] = projectName
 
             inventoryItems = projectInventoryResponse["inventoryItems"]
-
 
             for inventoryItem in inventoryItems:
                 componentName = inventoryItem["componentName"]
@@ -107,11 +90,10 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
                                                         "componentForgeName" : componentForgeName
                                                     }
 
-    reportData = {}
-    reportData["reportName"] = reportName
+    reportData["projectList"] = projectList
     reportData["projectData"] = projectData
     reportData["projectNames"] = projectNames
-    reportData["projectID"] = primaryProjectID
+    reportData["topLevelProjectName"] = topLevelProjectName
     reportData["secondaryProjectID"] = secondaryProjectID
     reportData["inventoryData"] = inventoryData
     reportData["largestHierachy"] = largestHierachy

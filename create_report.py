@@ -14,6 +14,7 @@ from datetime import datetime
 import _version
 import report_data
 import report_artifacts
+import report_errors
 import common.api.system.release
 import common.report_archive
 import common.api.project.upload_reports
@@ -125,7 +126,7 @@ def main():
 		reportData["reportName"] = reportName
 		reportData["reportFileNameBase"] = reportFileNameBase
 
-		#reports = report_errors.create_error_report(reportData)
+		reports = report_errors.create_error_report(reportData)
 		print("    *** ERROR  ***  Error found validating report options")
 	else:
 		reportData = report_data.gather_data_for_report(baseURL, projectID, authToken, reportData)
@@ -143,7 +144,7 @@ def main():
 		reportData["reportFileNameBase"] = reportFileNameBase
 
 		if "errorMsg" in reportData.keys():
-			#reports = report_errors.create_error_report(reportData)
+			reports = report_errors.create_error_report(reportData)
 			print("    Error report artifacts have been created")
 		else:
 			reports = report_artifacts.create_report_artifacts(reportData)

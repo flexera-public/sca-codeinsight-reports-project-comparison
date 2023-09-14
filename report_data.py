@@ -43,7 +43,6 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
         if len(projectList) > largestHierachy:
             largestHierachy = len(projectList)
         
-
         #  Gather the details for each project and summerize the data
         for project in projectList:
 
@@ -57,7 +56,9 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
             except:
                 logger.error("    No project ineventory response!")
                 print("No project inventory response.")
-                return -1
+                reportData["errorMsg"] = "No project ineventory response for project %s." %projectName
+                return reportData
+
 
             projectName = projectInventoryResponse["projectName"]
             projectNames[projectID] = topLevelProjectName
@@ -101,27 +102,3 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
     logger.info("Exiting gather_data_for_report")
 
     return reportData
-
-#----------------------------------------------#
-def create_project_hierarchy(project, parentID, projectList, baseURL):
-    logger.debug("Entering create_project_hierarchy")
-
-    # Are there more child projects for this project?
-    if len(project["childProject"]):
-
-        # Sort by project name of child projects
-        for childProject in sorted(project["childProject"], key = lambda i: i['name'] ) :
-
-            uniqueProjectID = str(parentID) + "-" + str(childProject["id"])
-            nodeDetails = {}
-            nodeDetails["projectID"] = childProject["id"]
-            nodeDetails["parent"] = parentID
-            nodeDetails["uniqueID"] = uniqueProjectID
-            nodeDetails["projectName"] = childProject["name"]
-            nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(childProject["id"]) + "&tab=projectInventory"
-
-            projectList.append( nodeDetails )
-
-            create_project_hierarchy(childProject, uniqueProjectID, projectList, baseURL)
-
-    return projectList

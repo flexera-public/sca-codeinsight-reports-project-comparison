@@ -4,5 +4,6 @@ venv
 *.pyc
 *.html
 *.zip
+test.bat
 
 

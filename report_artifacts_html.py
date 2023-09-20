@@ -7,7 +7,10 @@ Author : sgeary
 Created On : Wed Dec 08 2021
 File : report_artifacts_html.py
 '''
-import logging, os, base64
+import logging
+import os
+import base64
+
 import _version
 
 logger = logging.getLogger(__name__)
@@ -25,13 +28,11 @@ def generate_html_report(reportData):
     primaryProjectID = reportData["projectID"]
     secondaryProjectID = reportData["secondaryProjectID"]
     largestHierachy = reportData["largestHierachy"]
-    reportOptions = reportData["reportOptions"]
-    includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
-    cssFile =  os.path.join(scriptDirectory, "common/branding/css/revenera_common.css")
-    logoImageFile =  os.path.join(scriptDirectory, "common/branding/images/logo_reversed.svg")
-    iconFile =  os.path.join(scriptDirectory, "common/branding/images/favicon-revenera.ico")
+    cssFile =  os.path.join(scriptDirectory, "report_branding/css/revenera_common.css")
+    logoImageFile =  os.path.join(scriptDirectory, "report_branding/images/logo_reversed.svg")
+    iconFile =  os.path.join(scriptDirectory, "report_branding/images/favicon-revenera.ico")
 
     #########################################################
     #  Encode the image files
@@ -88,7 +89,7 @@ def generate_html_report(reportData):
     html_ptr.write("        </style>\n")  
 
     html_ptr.write("    	<link rel='icon' type='image/png' href='data:image/png;base64, {}'>\n".format(encodedfaviconImage.decode('utf-8')))
-    html_ptr.write("        <title>%s</title>\n" %(reportName))
+    html_ptr.write("        <title>%s</title>\n" %(reportName.upper()))
     html_ptr.write("    </head>\n") 
 
     html_ptr.write("<body>\n")
@@ -161,14 +162,10 @@ def generate_html_report(reportData):
 
     html_ptr.write("<colgroup>\n")
     html_ptr.write("<col span=\"1\" style=\"width: 20%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 15%;\">\n")
-    if includeUnpublishedInventory:
-        html_ptr.write("<col span=\"1\" style=\"width: 5%;\">\n")
+    html_ptr.write("<col span=\"1\" style=\"width: 20%;\">\n")
     html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
     html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 15%;\">\n")
-    if includeUnpublishedInventory:
-        html_ptr.write("<col span=\"1\" style=\"width: 5%;\">\n")
+    html_ptr.write("<col span=\"1\" style=\"width: 20%;\">\n")
     html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
     html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
     html_ptr.write("</colgroup>\n")
@@ -177,22 +174,17 @@ def generate_html_report(reportData):
     html_ptr.write("    <thead>\n")
     html_ptr.write("        <tr>\n")
     html_ptr.write("            <th colspan='1' class='text-center'>&nbsp</th>\n")  
-    html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
-    html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[1]) 
+    html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
+    html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[1]) 
     html_ptr.write("        </tr>\n") 
     html_ptr.write("        <tr>\n") 
     html_ptr.write("            <th class='text-center'>COMPONENT</th>\n") 
 
-    html_ptr.write("            <th class='text-center'>PROJECT</th>\n")
-    if includeUnpublishedInventory:
-        html_ptr.write("            <th class='text-center'>PUBLISHED?</th>\n")
-
+    html_ptr.write("            <th class='text-center'>PROJECT</th>\n") 
     html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
     html_ptr.write("            <th class='text-center'>FORGE</th>\n")
 
     html_ptr.write("            <th class='text-center'>PROJECT</th>\n")
-    if includeUnpublishedInventory:
-        html_ptr.write("            <th class='text-center'>PUBLISHED?</th>\n")
     html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
     html_ptr.write("            <th class='text-center'>FORGE</th>\n")  
     html_ptr.write("        </tr>\n")
@@ -210,28 +202,25 @@ def generate_html_report(reportData):
             proj1_selectedLicenseName = inventoryData[component][projectNames[0]]['selectedLicenseName'] 
             proj1_componentForgeName = inventoryData[component][projectNames[0]]['componentForgeName']
             proj1_projectName = inventoryData[component][projectNames[0]]['projectName']
-            proj1_publishedState =  inventoryData[component][projectNames[0]]['publishedState']
         else:
             proj1_selectedLicenseName = ""
             proj1_componentForgeName = ""
             proj1_projectName = ""
-            proj1_publishedState = ""
 
         # Is the component part of the second project?
         if projectNames[1] in inventoryData[component].keys():
             proj2_selectedLicenseName = inventoryData[component][projectNames[1]]['selectedLicenseName'] 
             proj2_componentForgeName = inventoryData[component][projectNames[1]]['componentForgeName']
             proj2_projectName = inventoryData[component][projectNames[1]]['projectName']
-            proj2_publishedState =  inventoryData[component][projectNames[1]]['publishedState']
+
         else:
             proj2_selectedLicenseName = ""
             proj2_componentForgeName = ""
             proj2_projectName = ""
-            proj2_publishedState = ""
 
         ################################################
         # Is this an exact match between projects?
-        if proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_publishedState == proj2_publishedState and proj1_componentForgeName == proj2_componentForgeName:
+        if proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_componentForgeName == proj2_componentForgeName:
             matchType = "CVL"
             html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         else:
@@ -241,13 +230,7 @@ def generate_html_report(reportData):
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
 
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(proj1_projectName))
-        if includeUnpublishedInventory:
-
-            if proj1_publishedState != proj2_publishedState: 
-                html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_publishedState)
-            else:
-                html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_publishedState)
-                    
+        
         if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
             html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_selectedLicenseName)
         else:
@@ -259,12 +242,6 @@ def generate_html_report(reportData):
             html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_componentForgeName)
 
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(proj2_projectName))
-        
-        if includeUnpublishedInventory:
-            if proj1_publishedState != proj2_publishedState: 
-                html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_publishedState)
-            else:
-                html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_publishedState)
         
         if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
             html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_selectedLicenseName)
@@ -319,9 +296,7 @@ def generate_html_report(reportData):
     
 
     html_ptr.write('''
-            var table = $('#comparisonData').DataTable({
-                "lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ]
-            });
+            var table = $('#comparisonData').DataTable();
 
             $("#hideExact").click(function() {
                 $.fn.dataTable.ext.search.pop();

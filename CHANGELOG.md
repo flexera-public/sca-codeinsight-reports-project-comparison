@@ -6,12 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.3.0] - 2023-09-20
-### Changed
-- Moved to common 3.6.8 env
-- Update to common submodule
-### Added
-- Option to include unpublished inventory and compare for differences
 
 ## [2.2.1] - 2023-06-29
 ### Changed

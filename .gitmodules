@@ -1,3 +1,7 @@
-[submodule "common"]
-	path = common
-	url = https://github.com/flexera-public/sca-codeinsight-reports-common.git
+[submodule "CodeInsight_RESTAPIs"]
+	path = CodeInsight_RESTAPIs
+	url = https://github.com/flexera/sca-codeinsight-restapi-python.git
+
+[submodule "report_branding"]
+	path = report_branding
+	url = https://github.com/flexera-public/sca-codeinsight-branding.git

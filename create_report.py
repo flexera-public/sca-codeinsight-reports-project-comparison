@@ -8,22 +8,25 @@ Created On : Fri Aug 07 2020
 File : create_report.py
 '''
 
-import sys, logging, os, argparse, json, re
+import sys
+import logging
+import argparse
+import zipfile
+import os
+import json
 from datetime import datetime
+import re
 
 import _version
 import report_data
 import report_artifacts
-import report_errors
-import common.api.system.release
-import common.report_archive
-import common.api.project.upload_reports
+import CodeInsight_RESTAPIs.project.upload_reports
 
 ###################################################################################
 # Test the version of python to make sure it's at least the version the script
 # was tested on, otherwise there could be unexpected results
-if sys.version_info < (3, 6):
-    raise Exception("The current version of Python is less than 3.6 which is unsupported.\n Script created/tested against python version 3.6.8. ")
+if sys.version_info <= (3, 5):
+    raise Exception("The current version of Python is less than 3.5 which is unsupported.\n Script created/tested against python version 3.8.1. ")
 else:
     pass
 
@@ -50,7 +53,6 @@ parser.add_argument("-reportOpts", "--reportOptions", help="Options for report c
 def main():
 
 	reportName = "Project Comparison Report"
-	reportVersion = _version.__version__
 	logger.info("Creating %s - %s" %(reportName, _version.__version__))
 	print("Creating %s - %s" %(reportName, _version.__version__))
 	print("    Logfile: %s" %(logfileName))
@@ -90,7 +92,6 @@ def main():
 	authToken = args.authToken
 
 	fileNameTimeStamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-	reportTimeStamp = datetime.strptime(fileNameTimeStamp, "%Y%m%d-%H%M%S").strftime("%B %d, %Y at %H:%M:%S")
 
 	# Based on how the shell pass the arguemnts clean up the options if on a linux system:w
 	if sys.platform.startswith('linux'):
@@ -98,65 +99,36 @@ def main():
 
 	reportOptions = json.loads(reportOptions)
 	reportOptions = verifyOptions(reportOptions) 
-
-	releaseDetails = common.api.system.release.get_release_details(baseURL, authToken)
-	releaseVersion = releaseDetails["fnci.release.name"].replace(" ", "")
 	
-	logger.debug("Code Insight Release: %s" %releaseVersion)
 	logger.debug("Custom Report Provided Arguments:")	
 	logger.debug("    projectID:  %s" %projectID)	
 	logger.debug("    reportID:   %s" %reportID)	
 	logger.debug("    reportOptions:  %s" %reportOptions)
 
-	reportData = {}
-	reportData["projectID"] = projectID
-	reportData["reportName"] = reportName
-	reportData["reportVersion"] = reportVersion
-	reportData["reportOptions"] = reportOptions
-	reportData["releaseDetails"] = releaseDetails
-	reportData["releaseVersion"] = releaseVersion
+	reportData = report_data.gather_data_for_report(baseURL, projectID, reportOptions, authToken, reportName)
+	print("    Report data has been collected")
+	
+	projectNames = reportData["projectNames"]
+	primaryProjectName = projectNames[projectID]
+	projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', primaryProjectName )  # Remove special characters from project name for artifacts
+	reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
+	
 	reportData["fileNameTimeStamp"] = fileNameTimeStamp
-	reportData["reportTimeStamp"] = reportTimeStamp
+	reportData["reportTimeStamp"] = datetime.strptime(fileNameTimeStamp, "%Y%m%d-%H%M%S").strftime("%B %d, %Y at %H:%M:%S")
+	reportData["reportFileNameBase"] = reportFileNameBase
 
-	# Did we fail the options validation?
-	if "errorMsg" in reportOptions.keys():
-		reportFileNameBase = reportName.replace(" ", "_") + "-Creation_Error-" + fileNameTimeStamp
+	reports = report_artifacts.create_report_artifacts(reportData)
+	print("    Report artifacts have been created")
 
-		reportData["errorMsg"] = reportOptions["errorMsg"]
-		reportData["reportName"] = reportName
-		reportData["reportFileNameBase"] = reportFileNameBase
+	#########################################################
+	# Create zip file to be uploaded to Code Insight
 
-		reports = report_errors.create_error_report(reportData)
-		print("    ** Error found validating report options")
-		logger.error("Error found validating report options")
-	else:
-		reportData = report_data.gather_data_for_report(baseURL, projectID, authToken, reportData)
-		print("    Report data has been collected")
-		
-		projectName = reportData["topLevelProjectName"]
-		projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', projectName )  # Remove special characters from project name for artifacts
-
-		# Are there child projects involved?  If so have the artifact file names reflect this fact
-		if len(reportData["projectList"])==1:
-			reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
-		else:
-			reportFileNameBase = projectNameForFile + "-with-children-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
-
-		reportData["reportFileNameBase"] = reportFileNameBase
-
-		if "errorMsg" in reportData.keys():
-			reports = report_errors.create_error_report(reportData)
-			print("    Error report artifacts have been created")
-		else:
-			reports = report_artifacts.create_report_artifacts(reportData)
-			print("    Report artifacts have been created")
-
-
-	print("    Create report archive for upload")
-	uploadZipfile = common.report_archive.create_report_zipfile(reports, reportFileNameBase)
+	uploadZipfile = create_report_zipfile(reports, reportFileNameBase)
 	print("    Upload zip file creation completed")
-	common.api.project.upload_reports.upload_project_report_data(baseURL, projectID, reportID, authToken, uploadZipfile)
-	print("    Report uploaded to Code Insight")
+
+	CodeInsight_RESTAPIs.project.upload_reports.upload_project_report_data(baseURL, projectID, reportID, authToken, uploadZipfile)
+
+
 	#########################################################
 	# Remove the file since it has been uploaded to Code Insight
 	try:
@@ -174,36 +146,24 @@ def verifyOptions(reportOptions):
 	'''
 	Expected Options for report:
 		includeChildProjects - True/False
-		includeUnpublishedInventory - True/False
 	'''
 	reportOptions["errorMsg"] = []
 	trueOptions = ["true", "t", "yes", "y"]
 	falseOptions = ["false", "f", "no", "n"]
 
 	includeChildProjects = reportOptions["includeChildProjects"]
-	includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]
 
 	if includeChildProjects.lower() in trueOptions:
-		reportOptions["includeChildProjects"] = True
+		reportOptions["includeChildProjects"] = "true"
 	elif includeChildProjects.lower() in falseOptions:
-		reportOptions["includeChildProjects"] = False
+		reportOptions["includeChildProjects"] = "false"
 	else:
 		reportOptions["errorMsg"].append("Invalid option for including child projects: <b>%s</b>.  Valid options are <b>True/False</b>" %includeChildProjects)
-	
-	if includeUnpublishedInventory.lower() in trueOptions:
-		reportOptions["includeUnpublishedInventory"] = True
-	elif includeUnpublishedInventory.lower() in falseOptions:
-		reportOptions["includeUnpublishedInventory"] = False
-	else:
-		reportOptions["errorMsg"].append("Invalid option for including unpublished items: <b>%s</b>.  Valid options are <b>True/False</b>" %includeUnpublishedInventory)
-
 
 	if not reportOptions["errorMsg"]:
 		reportOptions.pop('errorMsg', None)
 
 	return reportOptions
-
-
 
 
 #---------------------------------------------------------------------#

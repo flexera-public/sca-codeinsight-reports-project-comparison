@@ -9,22 +9,21 @@ File : report_data.py
 '''
 
 import logging
-import common.project_heirarchy
-import common.api.project.get_project_inventory
+import CodeInsight_RESTAPIs.project.get_project_inventory
+import CodeInsight_RESTAPIs.project.get_child_projects
 
 logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------#
-def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
+def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, reportName):
     logger.info("Entering gather_data_for_report")
-
-    reportOptions = reportData["reportOptions"]
 
     # Parse report options
     includeChildProjects = reportOptions["includeChildProjects"]  # True/False
-    includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
     secondaryProjectID = reportOptions["otherProjectId"]
 
+    
+    projectList = {} # Dictionary of lists to hold parent/child details for report
     inventoryData = {} # Create a dictionary containing the inveotry data using name/version strings as keys
     projectNames = {} # Create a list to contain the project names
     projectData = {}
@@ -33,10 +32,26 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
     for projectID in [primaryProjectID, secondaryProjectID]:
         projectList=[]
         projectData[projectID] = {}
+
         
         # Get the list of parent/child projects start at the base project
-        projectList = common.project_heirarchy.create_project_heirarchy(baseURL, authToken, projectID, includeChildProjects)
-        topLevelProjectName = projectList[0]["projectName"]
+        projectHierarchy = CodeInsight_RESTAPIs.project.get_child_projects.get_child_projects_recursively(baseURL, projectID, authToken)
+        topLevelProjectName = projectHierarchy["name"]
+
+        # Create a list of project data sorted by the project name at each level for report display  
+        # Add details for the parent node
+        nodeDetails = {}
+        nodeDetails["parent"] = "#"  # The root node
+        nodeDetails["projectName"] = projectHierarchy["name"]
+        nodeDetails["projectID"] = projectHierarchy["id"]
+        nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(projectHierarchy["id"]) + "&tab=projectInventory"
+
+        projectList.append(nodeDetails)
+
+        if includeChildProjects == "true":
+            projectList = create_project_hierarchy(projectHierarchy, projectHierarchy["id"], projectList, baseURL)
+        else:
+            logger.debug("Child hierarchy disabled")
 
         projectData[projectID]["projectList"] = projectList
 
@@ -44,40 +59,28 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
         if len(projectList) > largestHierachy:
             largestHierachy = len(projectList)
         
+
         #  Gather the details for each project and summerize the data
         for project in projectList:
 
-            projectID = project["projectID"]
+            subProjectID = project["projectID"]
             projectName = project["projectName"]
             projectLink = project["projectLink"]
 
             # Get details for  project
             try:
-                #projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
-                APIOPTIONS = "&includeFiles=false&skipVulnerabilities=true&published=true"
-                projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details_with_options(baseURL, projectID, authToken, APIOPTIONS)
-                
-                if includeUnpublishedInventory:
-                    APIOPTIONS = "&includeFiles=false&skipVulnerabilities=true&published=false"
-                    unpublishedProjectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details_with_options(baseURL, projectID, authToken, APIOPTIONS)
-                    inventoryItems = unpublishedProjectInventoryResponse["inventoryItems"]
-                    for inventoryItem in inventoryItems:
-                        inventoryItem["unpublished"] = True
-
-                    projectInventoryResponse["inventoryItems"] += inventoryItems
-
+                projectInventoryResponse = CodeInsight_RESTAPIs.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
             except:
                 logger.error("    No project ineventory response!")
                 print("No project inventory response.")
-                reportData["errorMsg"] = "No project ineventory response for project %s." %projectName
-                return reportData
-
+                return -1
 
             projectName = projectInventoryResponse["projectName"]
-            projectNames[projectID] = projectName
+            projectNames[projectID] = topLevelProjectName
             projectData[projectID]["projectName"] = projectName
 
             inventoryItems = projectInventoryResponse["inventoryItems"]
+
 
             for inventoryItem in inventoryItems:
                 componentName = inventoryItem["componentName"]
@@ -95,26 +98,20 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
                 if keyValue not in inventoryData:
                     inventoryData[keyValue] = {}
 
-                if "unpublished" in inventoryItem:
-                    publishedState = False
-                else:
-                    publishedState = True
-
-
                 inventoryData[keyValue][topLevelProjectName] = {
                                                         "projectName" : projectName,
                                                         "projectLink" : projectLink,
-                                                        "publishedState" : publishedState,
                                                         "componentName" : componentName,
                                                         "componentVersionName" : componentVersionName,
                                                         "selectedLicenseName" : selectedLicenseName,
                                                         "componentForgeName" : componentForgeName
                                                     }
 
-    reportData["projectList"] = projectList
+    reportData = {}
+    reportData["reportName"] = reportName
     reportData["projectData"] = projectData
     reportData["projectNames"] = projectNames
-    reportData["topLevelProjectName"] = topLevelProjectName
+    reportData["projectID"] = primaryProjectID
     reportData["secondaryProjectID"] = secondaryProjectID
     reportData["inventoryData"] = inventoryData
     reportData["largestHierachy"] = largestHierachy
@@ -122,3 +119,27 @@ def gather_data_for_report(baseURL, primaryProjectID, authToken, reportData):
     logger.info("Exiting gather_data_for_report")
 
     return reportData
+
+#----------------------------------------------#
+def create_project_hierarchy(project, parentID, projectList, baseURL):
+    logger.debug("Entering create_project_hierarchy")
+
+    # Are there more child projects for this project?
+    if len(project["childProject"]):
+
+        # Sort by project name of child projects
+        for childProject in sorted(project["childProject"], key = lambda i: i['name'] ) :
+
+            uniqueProjectID = str(parentID) + "-" + str(childProject["id"])
+            nodeDetails = {}
+            nodeDetails["projectID"] = childProject["id"]
+            nodeDetails["parent"] = parentID
+            nodeDetails["uniqueID"] = uniqueProjectID
+            nodeDetails["projectName"] = childProject["name"]
+            nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(childProject["id"]) + "&tab=projectInventory"
+
+            projectList.append( nodeDetails )
+
+            create_project_hierarchy(childProject, uniqueProjectID, projectList, baseURL)
+
+    return projectList

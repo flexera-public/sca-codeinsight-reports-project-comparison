@@ -11,6 +11,16 @@
             "defaultValue" : "True",
             "required" : "true",
             "order" : "1"
-        }
+        },
+        "option2" : 
+        {
+            "name" : "includeUnpublishedInventory",
+            "label" : "Include inventory items that are unpublished? (True/False)",
+            "description" : "Should the report include unpublished inventory? <b>(True/False)</b>",
+            "type" : "string",
+            "defaultValue" : "False",
+            "required" : "true",
+            "order" : "2"
+        }        
     }
 }

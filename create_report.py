@@ -127,7 +127,8 @@ def main():
 		reportData["reportFileNameBase"] = reportFileNameBase
 
 		reports = report_errors.create_error_report(reportData)
-		print("    *** ERROR  ***  Error found validating report options")
+		print("    ** Error found validating report options")
+		logger.error("Error found validating report options")
 	else:
 		reportData = report_data.gather_data_for_report(baseURL, projectID, authToken, reportData)
 		print("    Report data has been collected")
@@ -173,12 +174,14 @@ def verifyOptions(reportOptions):
 	'''
 	Expected Options for report:
 		includeChildProjects - True/False
+		includeUnpublishedInventory - True/False
 	'''
 	reportOptions["errorMsg"] = []
 	trueOptions = ["true", "t", "yes", "y"]
 	falseOptions = ["false", "f", "no", "n"]
 
 	includeChildProjects = reportOptions["includeChildProjects"]
+	includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]
 
 	if includeChildProjects.lower() in trueOptions:
 		reportOptions["includeChildProjects"] = True
@@ -186,11 +189,21 @@ def verifyOptions(reportOptions):
 		reportOptions["includeChildProjects"] = False
 	else:
 		reportOptions["errorMsg"].append("Invalid option for including child projects: <b>%s</b>.  Valid options are <b>True/False</b>" %includeChildProjects)
+	
+	if includeUnpublishedInventory.lower() in trueOptions:
+		reportOptions["includeUnpublishedInventory"] = True
+	elif includeUnpublishedInventory.lower() in falseOptions:
+		reportOptions["includeUnpublishedInventory"] = False
+	else:
+		reportOptions["errorMsg"].append("Invalid option for including unpublished items: <b>%s</b>.  Valid options are <b>True/False</b>" %includeUnpublishedInventory)
+
 
 	if not reportOptions["errorMsg"]:
 		reportOptions.pop('errorMsg', None)
 
 	return reportOptions
+
+
 
 
 #---------------------------------------------------------------------#

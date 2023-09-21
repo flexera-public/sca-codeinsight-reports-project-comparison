@@ -296,7 +296,9 @@ def generate_html_report(reportData):
     
 
     html_ptr.write('''
-            var table = $('#comparisonData').DataTable();
+            var table = $('#comparisonData').DataTable(
+                {"lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ],}
+            );
 
             $("#hideExact").click(function() {
                 $.fn.dataTable.ext.search.pop();

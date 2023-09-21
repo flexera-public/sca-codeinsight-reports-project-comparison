@@ -15,13 +15,15 @@ import common.api.project.get_child_projects
 logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------#
-def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, reportName):
+def gather_data_for_report(baseURL, authToken, reportData):
     logger.info("Entering gather_data_for_report")
+
+    reportOptions = reportData["reportOptions"]
+    primaryProjectID = reportData["projectID"]
 
     # Parse report options
     includeChildProjects = reportOptions["includeChildProjects"]  # True/False
     secondaryProjectID = reportOptions["otherProjectId"]
-
     
     projectList = {} # Dictionary of lists to hold parent/child details for report
     inventoryData = {} # Create a dictionary containing the inveotry data using name/version strings as keys
@@ -107,11 +109,8 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
                                                         "componentForgeName" : componentForgeName
                                                     }
 
-    reportData = {}
-    reportData["reportName"] = reportName
     reportData["projectData"] = projectData
     reportData["projectNames"] = projectNames
-    reportData["projectID"] = primaryProjectID
     reportData["secondaryProjectID"] = secondaryProjectID
     reportData["inventoryData"] = inventoryData
     reportData["largestHierachy"] = largestHierachy

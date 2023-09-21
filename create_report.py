@@ -8,26 +8,21 @@ Created On : Fri Aug 07 2020
 File : create_report.py
 '''
 
-import sys
-import logging
-import argparse
-import zipfile
-import os
-import json
+import sys, os, logging, argparse, json, re
 from datetime import datetime
-import re
 
 import _version
 import report_data
 import report_artifacts
 import common.api.project.upload_reports
 import common.report_archive
+import common.api.system.release
 
 ###################################################################################
 # Test the version of python to make sure it's at least the version the script
 # was tested on, otherwise there could be unexpected results
-if sys.version_info <= (3, 5):
-    raise Exception("The current version of Python is less than 3.5 which is unsupported.\n Script created/tested against python version 3.8.1. ")
+if sys.version_info < (3, 6):
+    raise Exception("The current version of Python is less than 3.6 which is unsupported.\n Script created/tested against python version 3.6.8. ")
 else:
     pass
 
@@ -54,8 +49,9 @@ parser.add_argument("-reportOpts", "--reportOptions", help="Options for report c
 def main():
 
 	reportName = "Project Comparison Report"
-	logger.info("Creating %s - %s" %(reportName, _version.__version__))
-	print("Creating %s - %s" %(reportName, _version.__version__))
+	reportVersion = _version.__version__
+	logger.info("Creating %s - %s" %(reportName, reportVersion))
+	print("Creating %s - %s" %(reportName, reportVersion))
 	print("    Logfile: %s" %(logfileName))
 
     #####################################################################################################
@@ -93,6 +89,7 @@ def main():
 	authToken = args.authToken
 
 	fileNameTimeStamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+	reportTimeStamp = datetime.strptime(fileNameTimeStamp, "%Y%m%d-%H%M%S").strftime("%B %d, %Y at %H:%M:%S")
 
 	# Based on how the shell pass the arguemnts clean up the options if on a linux system:w
 	if sys.platform.startswith('linux'):
@@ -101,21 +98,34 @@ def main():
 	reportOptions = json.loads(reportOptions)
 	reportOptions = verifyOptions(reportOptions) 
 	
+	releaseDetails = common.api.system.release.get_release_details(baseURL, authToken)
+	releaseVersion = releaseDetails["fnci.release.name"].replace(" ", "")
+
+	logger.debug("Code Insight Release: %s" %releaseVersion)
 	logger.debug("Custom Report Provided Arguments:")	
 	logger.debug("    projectID:  %s" %projectID)	
 	logger.debug("    reportID:   %s" %reportID)	
 	logger.debug("    reportOptions:  %s" %reportOptions)
 
-	reportData = report_data.gather_data_for_report(baseURL, projectID, reportOptions, authToken, reportName)
+	reportData = {}
+	reportData["projectID"] = projectID
+	reportData["reportName"] = reportName
+	reportData["reportVersion"] = reportVersion
+	reportData["reportOptions"] = reportOptions
+	reportData["releaseVersion"] = releaseVersion
+	reportData["fileNameTimeStamp"] = fileNameTimeStamp
+	reportData["reportTimeStamp"] = reportTimeStamp
+
+	print("    Collect data for %s" %reportName)
+	reportData = report_data.gather_data_for_report(baseURL, authToken, reportData)
 	print("    Report data has been collected")
-	
+		
 	projectNames = reportData["projectNames"]
 	primaryProjectName = projectNames[projectID]
 	projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', primaryProjectName )  # Remove special characters from project name for artifacts
 	reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
 	
 	reportData["fileNameTimeStamp"] = fileNameTimeStamp
-	reportData["reportTimeStamp"] = datetime.strptime(fileNameTimeStamp, "%Y%m%d-%H%M%S").strftime("%B %d, %Y at %H:%M:%S")
 	reportData["reportFileNameBase"] = reportFileNameBase
 
 	reports = report_artifacts.create_report_artifacts(reportData)

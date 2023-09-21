@@ -14,6 +14,7 @@ from datetime import datetime
 import _version
 import report_data
 import report_artifacts
+import report_errors
 import common.api.project.upload_reports
 import common.report_archive
 import common.api.system.release
@@ -116,22 +117,38 @@ def main():
 	reportData["fileNameTimeStamp"] = fileNameTimeStamp
 	reportData["reportTimeStamp"] = reportTimeStamp
 
-	print("    Collect data for %s" %reportName)
-	reportData = report_data.gather_data_for_report(baseURL, authToken, reportData)
-	print("    Report data has been collected")
-		
-	projectNames = reportData["projectNames"]
-	primaryProjectName = projectNames[projectID]
-	projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', primaryProjectName )  # Remove special characters from project name for artifacts
-	reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
-	
-	reportData["fileNameTimeStamp"] = fileNameTimeStamp
-	reportData["reportFileNameBase"] = reportFileNameBase
+	if "errorMsg" in reportOptions.keys():
 
-	reports = report_artifacts.create_report_artifacts(reportData)
-	print("    Report artifacts have been created")
-	for report in reports["allFormats"]:
-		print("       - %s"%report)
+		reportFileNameBase = reportName.replace(" ", "_") + "-Creation_Error-" + fileNameTimeStamp
+
+		reportData["errorMsg"] = reportOptions["errorMsg"]
+		reportData["reportName"] = reportName
+		reportData["reportFileNameBase"] = reportFileNameBase
+
+		reports = report_errors.create_error_report(reportData)
+		print("    *** ERROR  ***  Error found validating report options")
+	else:
+
+		print("    Collect data for %s" %reportName)
+		reportData = report_data.gather_data_for_report(baseURL, authToken, reportData)
+		print("    Report data has been collected")
+			
+		projectNames = reportData["projectNames"]
+		primaryProjectName = projectNames[projectID]
+		projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', primaryProjectName )  # Remove special characters from project name for artifacts
+		reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
+		
+		reportData["fileNameTimeStamp"] = fileNameTimeStamp
+		reportData["reportFileNameBase"] = reportFileNameBase
+
+		if "errorMsg" in reportData.keys():
+			reports = report_errors.create_error_report(reportData)
+			print("    Error report artifacts have been created")
+		else:
+			reports = report_artifacts.create_report_artifacts(reportData)
+			print("    Report artifacts have been created")
+			for report in reports["allFormats"]:
+				print("       - %s"%report)
 
 
 	#########################################################

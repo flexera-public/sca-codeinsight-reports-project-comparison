@@ -20,7 +20,7 @@ import re
 import _version
 import report_data
 import report_artifacts
-import CodeInsight_RESTAPIs.project.upload_reports
+import common.api.project.upload_reports
 
 ###################################################################################
 # Test the version of python to make sure it's at least the version the script
@@ -126,7 +126,7 @@ def main():
 	uploadZipfile = create_report_zipfile(reports, reportFileNameBase)
 	print("    Upload zip file creation completed")
 
-	CodeInsight_RESTAPIs.project.upload_reports.upload_project_report_data(baseURL, projectID, reportID, authToken, uploadZipfile)
+	common.api.project.upload_reports.upload_project_report_data(baseURL, projectID, reportID, authToken, uploadZipfile)
 
 
 	#########################################################

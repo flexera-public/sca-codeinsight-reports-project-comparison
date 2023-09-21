@@ -9,8 +9,8 @@ File : report_data.py
 '''
 
 import logging
-import CodeInsight_RESTAPIs.project.get_project_inventory
-import CodeInsight_RESTAPIs.project.get_child_projects
+import common.api.project.get_project_inventory
+import common.api.project.get_child_projects
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
 
         
         # Get the list of parent/child projects start at the base project
-        projectHierarchy = CodeInsight_RESTAPIs.project.get_child_projects.get_child_projects_recursively(baseURL, projectID, authToken)
+        projectHierarchy = common.api.project.get_child_projects.get_child_projects_recursively(baseURL, projectID, authToken)
         topLevelProjectName = projectHierarchy["name"]
 
         # Create a list of project data sorted by the project name at each level for report display  
@@ -69,7 +69,7 @@ def gather_data_for_report(baseURL, primaryProjectID, reportOptions, authToken, 
 
             # Get details for  project
             try:
-                projectInventoryResponse = CodeInsight_RESTAPIs.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
+                projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
             except:
                 logger.error("    No project ineventory response!")
                 print("No project inventory response.")

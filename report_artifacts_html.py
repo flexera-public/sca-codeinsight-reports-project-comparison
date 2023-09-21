@@ -30,9 +30,9 @@ def generate_html_report(reportData):
     largestHierachy = reportData["largestHierachy"]
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
-    cssFile =  os.path.join(scriptDirectory, "report_branding/css/revenera_common.css")
-    logoImageFile =  os.path.join(scriptDirectory, "report_branding/images/logo_reversed.svg")
-    iconFile =  os.path.join(scriptDirectory, "report_branding/images/favicon-revenera.ico")
+    cssFile =  os.path.join(scriptDirectory, "common/branding/css/revenera_common.css")
+    logoImageFile =  os.path.join(scriptDirectory, "common/branding/images/logo_reversed.svg")
+    iconFile =  os.path.join(scriptDirectory, "common/branding/images/favicon-revenera.ico")
 
     #########################################################
     #  Encode the image files

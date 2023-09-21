@@ -10,7 +10,7 @@ File : report_data.py
 
 import logging
 import common.api.project.get_project_inventory
-import common.api.project.get_child_projects
+import common.project_heirarchy
 
 logger = logging.getLogger(__name__)
 
@@ -35,25 +35,8 @@ def gather_data_for_report(baseURL, authToken, reportData):
         projectList=[]
         projectData[projectID] = {}
 
-        
-        # Get the list of parent/child projects start at the base project
-        projectHierarchy = common.api.project.get_child_projects.get_child_projects_recursively(baseURL, projectID, authToken)
-        topLevelProjectName = projectHierarchy["name"]
-
-        # Create a list of project data sorted by the project name at each level for report display  
-        # Add details for the parent node
-        nodeDetails = {}
-        nodeDetails["parent"] = "#"  # The root node
-        nodeDetails["projectName"] = projectHierarchy["name"]
-        nodeDetails["projectID"] = projectHierarchy["id"]
-        nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(projectHierarchy["id"]) + "&tab=projectInventory"
-
-        projectList.append(nodeDetails)
-
-        if includeChildProjects == "true":
-            projectList = create_project_hierarchy(projectHierarchy, projectHierarchy["id"], projectList, baseURL)
-        else:
-            logger.debug("Child hierarchy disabled")
+        projectList = common.project_heirarchy.create_project_heirarchy(baseURL, authToken, projectID, includeChildProjects)
+        topLevelProjectName = projectList[0]["projectName"]
 
         projectData[projectID]["projectList"] = projectList
 
@@ -61,7 +44,6 @@ def gather_data_for_report(baseURL, authToken, reportData):
         if len(projectList) > largestHierachy:
             largestHierachy = len(projectList)
         
-
         #  Gather the details for each project and summerize the data
         for project in projectList:
 

@@ -179,9 +179,13 @@ def generate_html_report(reportData):
 
     html_ptr.write("    <thead>\n")
     html_ptr.write("        <tr>\n")
-    html_ptr.write("            <th colspan='1' class='text-center'>&nbsp</th>\n")  
-    html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
-    html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[1]) 
+    html_ptr.write("            <th colspan='1' class='text-center'>&nbsp</th>\n") 
+    if includeUnpublishedInventory: 
+        html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
+        html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[1])
+    else:
+        html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
+        html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[1])
     html_ptr.write("        </tr>\n") 
     html_ptr.write("        <tr>\n") 
     html_ptr.write("            <th class='text-center'>COMPONENT</th>\n") 

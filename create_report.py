@@ -36,6 +36,7 @@ logfileName = os.path.join(os.path.dirname(os.path.realpath(__file__)),"_project
 logging.basicConfig(format='%(asctime)s,%(msecs)-3d  %(levelname)-8s [%(filename)-30s:%(lineno)-4d]  %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', filename=logfileName, filemode='w',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logging.getLogger("urllib3").setLevel(logging.WARNING)  # Disable logging for requests module
+logging.getLogger("common").setLevel(logging.WARNING)  # Disable logging for requests module
 
 ####################################################################################
 # Create command line argument options
@@ -176,12 +177,14 @@ def verifyOptions(reportOptions):
 	'''
 	Expected Options for report:
 		includeChildProjects - True/False
+		includeUnpublishedInventory - True/False
 	'''
 	reportOptions["errorMsg"] = []
 	trueOptions = ["true", "t", "yes", "y"]
 	falseOptions = ["false", "f", "no", "n"]
 
 	includeChildProjects = reportOptions["includeChildProjects"]
+	includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]
 
 	if includeChildProjects.lower() in trueOptions:
 		reportOptions["includeChildProjects"] = True
@@ -189,6 +192,15 @@ def verifyOptions(reportOptions):
 		reportOptions["includeChildProjects"] = False
 	else:
 		reportOptions["errorMsg"].append("Invalid option for including child projects: <b>%s</b>.  Valid options are <b>True/False</b>" %includeChildProjects)
+
+	if includeUnpublishedInventory.lower() in trueOptions:
+		reportOptions["includeUnpublishedInventory"] = True
+	elif includeUnpublishedInventory.lower() in falseOptions:
+		reportOptions["includeUnpublishedInventory"] = False
+	else:
+		reportOptions["errorMsg"].append("Invalid option for including child projects: <b>%s</b>.  Valid options are <b>True/False</b>" %includeUnpublishedInventory)
+
+
 
 	if not reportOptions["errorMsg"]:
 		reportOptions.pop('errorMsg', None)

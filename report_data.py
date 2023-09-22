@@ -23,6 +23,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
 
     # Parse report options
     includeChildProjects = reportOptions["includeChildProjects"]  # True/False
+    includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
     secondaryProjectID = reportOptions["otherProjectId"]
     
     projectList = {} # Dictionary of lists to hold parent/child details for report
@@ -53,17 +54,37 @@ def gather_data_for_report(baseURL, authToken, reportData):
 
             # Get details for  project
             try:
+                logger.info("        Getting inventory for project: %s" %projectName)
+                print("        Getting inventory for project: %s" %projectName)
                 projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details(baseURL, subProjectID, authToken)
             except:
                 logger.error("    No project ineventory response!")
                 print("No project inventory response.")
                 return -1
 
+
             projectName = projectInventoryResponse["projectName"]
             projectNames[projectID] = topLevelProjectName
             projectData[projectID]["projectName"] = projectName
 
             inventoryItems = projectInventoryResponse["inventoryItems"]
+
+            if includeUnpublishedInventory:
+                logger.info("        Getting unpublished inventory for project: %s" %projectName)
+                print("        Getting unpublished inventory for project: %s" %projectName)
+                APIOPTIONS = "&includeFiles=false&skipVulnerabilities=true&published=false"
+                projectInventoryResponse = common.api.project.get_project_inventory.get_project_inventory_details_with_options(baseURL, subProjectID, authToken, APIOPTIONS)
+                if "error" in projectInventoryResponse:
+                    logger.error(projectInventoryResponse["error"])
+                else:
+                    unpublishedInventoryItems = projectInventoryResponse["inventoryItems"]
+                    if "error" in unpublishedInventoryItems:
+                        logger.error(projectInventoryResponse["error"])
+
+                    for unpublishedInventoryItem in unpublishedInventoryItems:
+                        unpublishedInventoryItem["unpublished"] = True
+
+                    inventoryItems += unpublishedInventoryItems
 
 
             for inventoryItem in inventoryItems:
@@ -82,9 +103,16 @@ def gather_data_for_report(baseURL, authToken, reportData):
                 if keyValue not in inventoryData:
                     inventoryData[keyValue] = {}
 
+                # Determine if the item was published or not
+                if "unpublished" in inventoryItem:
+                    publishedState = False
+                else:
+                    publishedState = True
+
                 inventoryData[keyValue][topLevelProjectName] = {
                                                         "projectName" : projectName,
                                                         "projectLink" : projectLink,
+                                                        "publishedState" : publishedState,
                                                         "componentName" : componentName,
                                                         "componentVersionName" : componentVersionName,
                                                         "selectedLicenseName" : selectedLicenseName,

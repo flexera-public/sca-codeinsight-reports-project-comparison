@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2023-10-16
+### Changed
+- Update common submodule to prep for tomcat upgrade in 2023R4
+
+## [2.3.0] - 2023-09-21
+### Added
+- Support for unpublished inventory
+### Changed
+- Updated to use common submodule
+
 
 ## [2.2.1] - 2023-06-29
 ### Changed

@@ -202,7 +202,7 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                         selectedLicense = "N/A"
 
                 # Determine if this is a new component for this project (parent/children) or another occurance
-                if componentId in inventoryData:       
+                if componentId in inventoryData:     
                     if componentVersionName in inventoryData[componentId]["componentVersions"]:
                         if selectedLicense in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"]:
                             if publishedState in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"]:
@@ -210,11 +210,6 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                             else:
                                 inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
                                 inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
-
-                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"] = {}
-                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
-                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
-                        
                         else:
                             inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense] = {}
                             inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"] = {}
@@ -228,6 +223,7 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
                 else:
+                    print("Creating new things for %s" %componentName)
                     inventoryData[componentId] = {}  # A dictionary using comp version as keys
                     inventoryData[componentId]["componentName"] = componentName
                     inventoryData[componentId]["componentVersions"] = {}  # A dictionary using selected license as keys

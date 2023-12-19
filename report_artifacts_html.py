@@ -189,7 +189,6 @@ def generate_html_report(reportData):
     html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
     html_ptr.write("</colgroup>\n")
 
-
     html_ptr.write("    <thead>\n")
     html_ptr.write("        <tr>\n")
     html_ptr.write("            <th colspan='1' class='text-center'>&nbsp</th>\n") 
@@ -224,11 +223,11 @@ def generate_html_report(reportData):
         component = row[0]
         primaryProjectVersion =    "&nbsp" if row[1] is None else row[1] 
         primaryProjectLicense =    "&nbsp" if row[2] is None else row[2] 
-        primaryProjectProjects =   "&nbsp" if row[3] is None else row[3] 
+        primaryProjectProjects =   ["&nbsp"] if row[3] is None else row[3] 
         primaryProjectPublicationState =  "&nbsp" if row[4] is None else row[4] 
         secondaryProjectVersion =  "&nbsp" if row[5] is None else row[5] 
         secondaryProjectLicense = "&nbsp" if row[6] is None else row[6] 
-        secondaryProjectProjects = "&nbsp" if row[7] is None else row[7] 
+        secondaryProjectProjects = ["&nbsp"] if row[7] is None else row[7] 
         secondatryProjectPublicationState = "&nbsp" if row[8] is None else row[8] 
         matchType = row[9] 
 
@@ -240,7 +239,9 @@ def generate_html_report(reportData):
         
         tdclass = 'text-left' if "L" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectLicense))
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %(primaryProjectProjects))
+
+        html_ptr.write("            <td class='text-left'>%s</th>\n" %('<br>'.join(primaryProjectProjects)))
+              
         if includeUnpublishedInventory:
             tdclass = 'text-left' if "P" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectPublicationState))
@@ -249,7 +250,9 @@ def generate_html_report(reportData):
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectVersion))
         tdclass = 'text-left' if "L" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectLicense))
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %(secondaryProjectProjects)) 
+        
+        html_ptr.write("            <td class='text-left'>%s</th>\n" %('<br>'.join(secondaryProjectProjects))) 
+                
         if includeUnpublishedInventory:
             tdclass = 'text-left' if "P" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondatryProjectPublicationState))

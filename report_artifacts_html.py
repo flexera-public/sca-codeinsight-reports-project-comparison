@@ -7,10 +7,7 @@ Author : sgeary
 Created On : Wed Dec 08 2021
 File : report_artifacts_html.py
 '''
-import logging
-import os
-import base64
-
+import logging, os, base64
 import _version
 
 logger = logging.getLogger(__name__)
@@ -19,17 +16,15 @@ logger = logging.getLogger(__name__)
 def generate_html_report(reportData):
     logger.info("    Entering generate_html_report")
 
-    reportName = reportData["reportName"]
-    projectNames  = list(reportData["projectNames"].values())
+    reportName = reportData["reportName"]   
     reportFileNameBase = reportData["reportFileNameBase"]
     reportTimeStamp =  reportData["reportTimeStamp"] 
-    inventoryData = reportData["inventoryData"]
-    projectData = reportData["projectData"]
-    primaryProjectID = reportData["projectID"]
-    secondaryProjectID = reportData["secondaryProjectID"]
+    primaryProjectName = reportData["primaryProjectName"]
+    secondaryProjectName = reportData["secondaryProjectName"]
     largestHierachy = reportData["largestHierachy"]
     reportOptions = reportData["reportOptions"]
     includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
+    tableData = reportData["tableData"]
     
     scriptDirectory = os.path.dirname(os.path.realpath(__file__))
     cssFile =  os.path.join(scriptDirectory, "common/branding/css/revenera_common.css")
@@ -128,12 +123,12 @@ def generate_html_report(reportData):
         html_ptr.write("    <div class='row'>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %projectNames[0]) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %primaryProjectName) 
         html_ptr.write("            <div id='project_hierarchy1'></div>\n")
         html_ptr.write("        </div>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %projectNames[1]) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %secondaryProjectName) 
         html_ptr.write("            <div id='project_hierarchy2'></div>\n")
         html_ptr.write("        </div>\n")
 
@@ -142,20 +137,38 @@ def generate_html_report(reportData):
 
         html_ptr.write("<hr class='small'>")
 
-
-
     html_ptr.write('''<div class="btn-toolbar" role="toolbar" aria-label="button toolbar">\n''')
+
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="all">''')
+    html_ptr.write('''         <button id="reset" type="button" class="btn btn-revenera-gray">Show All Inventory</button>\n''')
+    html_ptr.write('''    </div>\n''')
+
     html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="common" >''')
-    html_ptr.write('''        <button  type="button" class="btn  btn-revenera-gray" id="hideNonExact">Show Common Components</button>\n''')
+    html_ptr.write('''        <button  type="button" class="btn  btn-revenera-gray" id="showExact">Show Common Inventory</button>\n''')
     html_ptr.write('''    </div>\n''')
     html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="diffs">''')
-    html_ptr.write('''        <button id="hideExact" type="button" class="btn btn-revenera-gray">Show Differences</button>\n''')
+    html_ptr.write('''        <button id="hideExact" type="button" class="btn btn-revenera-gray">Show All Differences</button>\n''')
     html_ptr.write('''    </div>\n''')
-    html_ptr.write('''    <div class="btn-group" role="group" aria-label="all">''')
-    html_ptr.write('''         <button id="reset" type="button" class="btn btn-revenera-gray">Show All</button>\n''')
+
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="version">''')
+    html_ptr.write('''        <button id="showVersionDifferences" type="button" class="btn btn-revenera-gray">Show Version Differences</button>\n''')
+    html_ptr.write('''    </div>\n''')
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="license">''')
+    html_ptr.write('''        <button id="showLicenseDifferences" type="button" class="btn btn-revenera-gray">Show License Differences</button>\n''')
+    html_ptr.write('''    </div>\n''')
+
+    if includeUnpublishedInventory:
+        html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="published">''')
+        html_ptr.write('''        <button id="showPublishedDifferences" type="button" class="btn btn-revenera-gray">Show Published State Differences</button>\n''')
+        html_ptr.write('''    </div>\n''')
+
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="primary">''')
+    html_ptr.write('''        <button id="showUniquePrimaryProject" type="button" class="btn btn-revenera-gray">Show Components Only in %s</button>\n'''%primaryProjectName)
+    html_ptr.write('''    </div>\n''')
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="secondary">''')
+    html_ptr.write('''        <button id="showUniqueSecondaryProject" type="button" class="btn btn-revenera-gray">Show Components Only in %s</button>\n''' %secondaryProjectName)
     html_ptr.write('''    </div>\n''')
     html_ptr.write('''</div>\n''')
-
 
     html_ptr.write('''<p>''')
     html_ptr.write('''<p>''')
@@ -180,112 +193,69 @@ def generate_html_report(reportData):
     html_ptr.write("    <thead>\n")
     html_ptr.write("        <tr>\n")
     html_ptr.write("            <th colspan='1' class='text-center'>&nbsp</th>\n") 
-    if includeUnpublishedInventory: 
-        html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
-        html_ptr.write("            <th colspan='4' class='text-center'><h4>%s</h4></th>\n" %projectNames[1])
+
+    if includeUnpublishedInventory:
+        headerColSpan = 4
     else:
-        html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[0])  
-        html_ptr.write("            <th colspan='3' class='text-center'><h4>%s</h4></th>\n" %projectNames[1])
+        headerColSpan = 3
+
+    html_ptr.write("            <th colspan='%s' class='text-center'><h4>%s</h4></th>\n" %(headerColSpan, primaryProjectName))
+    html_ptr.write("            <th colspan='%s' class='text-center'><h4>%s</h4></th>\n" %(headerColSpan, secondaryProjectName))
     html_ptr.write("        </tr>\n") 
     html_ptr.write("        <tr>\n") 
     html_ptr.write("            <th class='text-center'>COMPONENT</th>\n") 
-
-    html_ptr.write("            <th class='text-center'>PROJECT</th>\n")
+    html_ptr.write("            <th class='text-center'>VERSION</th>\n")
+    html_ptr.write("            <th class='text-center'>LICENSE</th>\n")
+    html_ptr.write("            <th class='text-center'>PROJECTS</th>\n")
     if includeUnpublishedInventory:
-        html_ptr.write("            <th class='text-center'>PUBLISHED?</th>\n")
-
-    html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
-    html_ptr.write("            <th class='text-center'>FORGE</th>\n")
-
-    html_ptr.write("            <th class='text-center'>PROJECT</th>\n")
+        html_ptr.write("            <th class='text-center'>PUBLISHED STATE</th>\n")
+    html_ptr.write("            <th class='text-center'>VERSION</th>\n")
+    html_ptr.write("            <th class='text-center'>LICENSE</th>\n")
+    html_ptr.write("            <th class='text-center'>PROJECTS</th>\n")
     if includeUnpublishedInventory:
-        html_ptr.write("            <th class='text-center'>PUBLISHED?</th>\n")
-    html_ptr.write("            <th class='text-center'>SELECTED LICENSE</th>\n") 
-    html_ptr.write("            <th class='text-center'>FORGE</th>\n")  
+        html_ptr.write("            <th class='text-center'>PUBLISHEDSTATE</th>\n")
+
     html_ptr.write("        </tr>\n")
     html_ptr.write("    </thead>\n")  
 
     html_ptr.write("    <tbody>\n")  
 
+    for row in tableData:
+        component = row[0]
+        primaryProjectVersion =    "&nbsp" if row[1] is None else row[1] 
+        primaryProjectLicense =    "&nbsp" if row[2] is None else row[2] 
+        primaryProjectProjects =   "&nbsp" if row[3] is None else row[3] 
+        primaryProjectPublicationState =  "&nbsp" if row[4] is None else row[4] 
+        secondaryProjectVersion =  "&nbsp" if row[5] is None else row[5] 
+        secondaryProjectLicense = "&nbsp" if row[6] is None else row[6] 
+        secondaryProjectProjects = "&nbsp" if row[7] is None else row[7] 
+        secondatryProjectPublicationState = "&nbsp" if row[8] is None else row[8] 
+        matchType = row[9] 
 
-    ######################################################
-    # Cycle through the inventory to create the 
-    # table with the results
-    for component in sorted(inventoryData):
-
-        # Is the component part of the first project?
-        if projectNames[0] in inventoryData[component].keys():
-            proj1_selectedLicenseName = inventoryData[component][projectNames[0]]['selectedLicenseName'] 
-            proj1_componentForgeName = inventoryData[component][projectNames[0]]['componentForgeName']
-            proj1_projectName = inventoryData[component][projectNames[0]]['projectName']
-            proj1_publishedState =  inventoryData[component][projectNames[0]]['publishedState']
-        else:
-            proj1_selectedLicenseName = ""
-            proj1_componentForgeName = ""
-            proj1_projectName = ""
-            proj1_publishedState = ""
-
-        # Is the component part of the second project?
-        if projectNames[1] in inventoryData[component].keys():
-            proj2_selectedLicenseName = inventoryData[component][projectNames[1]]['selectedLicenseName'] 
-            proj2_componentForgeName = inventoryData[component][projectNames[1]]['componentForgeName']
-            proj2_projectName = inventoryData[component][projectNames[1]]['projectName']
-            proj2_publishedState =  inventoryData[component][projectNames[1]]['publishedState']
-        else:
-            proj2_selectedLicenseName = ""
-            proj2_componentForgeName = ""
-            proj2_projectName = ""
-            proj2_publishedState = ""
-
-        ################################################
-        # Is this an exact match between projects?
-        if proj1_selectedLicenseName == proj2_selectedLicenseName and proj1_publishedState == proj2_publishedState and proj1_componentForgeName == proj2_componentForgeName:
-            matchType = "CVL"
-            html_ptr.write("        <tr matchType='%s'> \n" %matchType)
-        else:
-            matchType = "CV"
-            html_ptr.write("        <tr class='tr-notExactMatch' matchType='%s'> \n" %matchType)
-        
+        html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
 
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %(proj1_projectName))
-
+        tdclass = "text-left" if "V" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectVersion))
+        
+        tdclass = 'text-left' if "L" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectLicense))
+        html_ptr.write("            <td class='text-left'>%s</th>\n" %(primaryProjectProjects))
         if includeUnpublishedInventory:
-            if proj1_publishedState != proj2_publishedState: 
-                html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_publishedState)
-            else:
-                html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_publishedState)
-        
-        if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
-            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_selectedLicenseName)
-        else:
-            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_selectedLicenseName)
-        
-        if proj1_componentForgeName != proj2_componentForgeName and proj1_componentForgeName != "" and proj2_componentForgeName != "": 
-            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj1_componentForgeName)
-        else:
-            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj1_componentForgeName)
+            tdclass = 'text-left' if "P" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectPublicationState))
 
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %(proj2_projectName))
-
+        tdclass = 'text-left' if "V" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectVersion))
+        tdclass = 'text-left' if "L" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectLicense))
+        html_ptr.write("            <td class='text-left'>%s</th>\n" %(secondaryProjectProjects)) 
         if includeUnpublishedInventory:
-            if proj1_publishedState != proj2_publishedState: 
-                html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_publishedState)
-            else:
-                html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_publishedState)
-        
-        
-        if proj1_selectedLicenseName != proj2_selectedLicenseName and proj1_selectedLicenseName != "" and proj2_selectedLicenseName != "": 
-            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_selectedLicenseName)
-        else:
-            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_selectedLicenseName)
-
-        if proj1_componentForgeName != proj2_componentForgeName and proj1_componentForgeName != "" and proj2_componentForgeName != "": 
-            html_ptr.write("            <td class='td-nomatch text-left'>%s</th>\n" %proj2_componentForgeName)
-        else:
-            html_ptr.write("            <td class='text-left'>%s</th>\n" %proj2_componentForgeName)
+            tdclass = 'text-left' if "P" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondatryProjectPublicationState))
 
         html_ptr.write("        </tr>\n") 
+
     html_ptr.write("    </tbody>\n")
 
     html_ptr.write("</table>\n")  
@@ -323,36 +293,91 @@ def generate_html_report(reportData):
 
     if largestHierachy > 1:
         # Add the js for the project summary stacked bar charts
-        generate_project_hierarchy_tree(html_ptr, projectData[primaryProjectID]["projectList"], "project_hierarchy1")
-        generate_project_hierarchy_tree(html_ptr, projectData[secondaryProjectID]["projectList"], "project_hierarchy2")
+        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], "project_hierarchy1")
+        generate_project_hierarchy_tree(html_ptr, reportData["secondaryProjectList"], "project_hierarchy2")
     
+
 
     html_ptr.write('''
             var table = $('#comparisonData').DataTable(
                 {"lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ],}
             );
 
+            $("#showExact").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return $(table.row(dataIndex).node()).attr('matchType') == "CVLP";
+                }
+            );
+            table.draw();
+            }); 
+
+                   
             $("#hideExact").click(function() {
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return $(table.row(dataIndex).node()).attr('matchType') == "CV";
+                    return $(table.row(dataIndex).node()).attr('matchType') != "CVLP";
+                }
+            );
+            table.draw();
+            });                    
+
+
+            $("#showVersionDifferences").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("V") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
+                }
+            );
+            table.draw();
+            }); 
+                   
+            $("#showLicenseDifferences").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("L") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
+                }
+            );
+            table.draw();
+            }); 
+
+            $("#showPublishedDifferences").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("P") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
                 }
             );
             table.draw();
             }); 
 
 
-            $("#hideNonExact").click(function() {
-            $.fn.dataTable.ext.search.pop();
+
+            $("#showUniquePrimaryProject").click(function() {
+                $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
+                    return $(table.row(dataIndex).node()).attr('matchType') == "uniquePrimaryProject";
+                }
+            );
+            table.draw();
+            }); 
 
-                    return $(table.row(dataIndex).node()).attr('matchType') == "CVL";
-                    }
-                );
-                table.draw();
-            });    
+            $("#showUniqueSecondaryProject").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return $(table.row(dataIndex).node()).attr('matchType') == "uniqueSecondaryProject";
+                }
+            );
+            table.draw();
+            }); 
+                 
+  
             $("#reset").click(function() {
                 $.fn.dataTable.ext.search.pop();
                 table.draw();
@@ -400,7 +425,6 @@ def generate_project_hierarchy_tree(html_ptr, projectHierarchy, chartIdentifier)
 
     for project in projectHierarchy:
 
-       
         # is this the top most parent or a child project with a parent
         if "uniqueID" in project:
             projectIdentifier = project["uniqueID"]

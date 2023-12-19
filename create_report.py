@@ -110,7 +110,8 @@ def main():
 	logger.debug("    reportOptions:  %s" %reportOptions)
 
 	reportData = {}
-	reportData["projectID"] = projectID
+	reportData["primaryProjectID"] = projectID
+	reportData["secondaryProjectID"] = reportOptions["otherProjectId"]
 	reportData["reportName"] = reportName
 	reportData["reportVersion"] = reportVersion
 	reportData["reportOptions"] = reportOptions
@@ -132,20 +133,28 @@ def main():
 
 		print("    Collect data for %s" %reportName)
 		reportData = report_data.gather_data_for_report(baseURL, authToken, reportData)
-		print("    Report data has been collected")
-			
-		projectNames = reportData["projectNames"]
-		primaryProjectName = projectNames[projectID]
-		projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', primaryProjectName )  # Remove special characters from project name for artifacts
-		reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
-		
-		reportData["fileNameTimeStamp"] = fileNameTimeStamp
-		reportData["reportFileNameBase"] = reportFileNameBase
 
 		if "errorMsg" in reportData.keys():
+			logger.error("Error collecting report data: %s" %reportData["errorMsg"])
+
+			reportFileNameBase = reportName.replace(" ", "_") + "-Creation_Error-" + fileNameTimeStamp
+			reportData["errorMsg"] = reportData["errorMsg"]
+			reportData["reportName"] = reportName
+			reportData["reportFileNameBase"] = reportFileNameBase
+
 			reports = report_errors.create_error_report(reportData)
 			print("    Error report artifacts have been created")
+
 		else:
+	
+			print("    Report data has been collected")
+
+			projectNameForFile = re.sub(r"[^a-zA-Z0-9]+", '-', reportData["primaryProjectName"] )  # Remove special characters from project name for artifacts
+			reportFileNameBase = projectNameForFile + "-" + str(projectID) + "-" + reportName.replace(" ", "_") + "-" + fileNameTimeStamp
+			
+			reportData["fileNameTimeStamp"] = fileNameTimeStamp
+			reportData["reportFileNameBase"] = reportFileNameBase
+
 			reports = report_artifacts.create_report_artifacts(reportData)
 			print("    Report artifacts have been created")
 			for report in reports["allFormats"]:

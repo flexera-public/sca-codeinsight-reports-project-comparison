@@ -159,12 +159,14 @@ def get_project_details(baseURL, authToken, projectID, reportData):
 
             # Cycle through each item to get the CVL data
             for inventoryItem in projectInventoryResponse:
-
+                inventoryId = inventoryItem["id"]
                 componentId = inventoryItem["componentId"]
                 componentName = inventoryItem["componentName"]
                 componentVersionName = inventoryItem["componentVersionName"]
                 selectedLicenseId = inventoryItem["selectedLicenseId"]
                 selectedLicense = inventoryItem["selectedLicenseSPDXIdentifier"] 
+
+                inventoryLink = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(projectID) + "&tab=projectInventory&pinv=" + str(inventoryId)
                               
                 # for WIP and LO items use the inventory item name vs the componentId
                 inventoryType = inventoryItem["type"]
@@ -206,22 +208,33 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                     if componentVersionName in inventoryData[componentId]["componentVersions"]:
                         if selectedLicense in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"]:
                             if publishedState in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"]:
-                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
+                                    if projectName in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"]:
+                                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
+                                    else:
+                                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
+                                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
+                                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                             else:
-                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
-                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
+                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = {}
+                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
+                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
+                                inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                         else:
                             inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense] = {}
                             inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"] = {}
-                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
-                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
+                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = {}
+                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
+                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
+                            inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                     else:
                         inventoryData[componentId]["componentVersions"][componentVersionName] = {}
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"] = {}
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense] = {}
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"] = {}
-                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
-                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
+                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = {}
+                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
+                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
+                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                 else:
                     inventoryData[componentId] = {}  # A dictionary using comp version as keys
                     inventoryData[componentId]["componentName"] = componentName
@@ -230,9 +243,10 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"] = {}
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense] = {}
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"] = {}
-                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
-                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
-
+                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = {}
+                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
+                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
+                    inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
 
     return projectList, inventoryData
 
@@ -369,8 +383,8 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
                 primaryProjectPublishedState = uniquePrimary_CVLP[0]
                 secondaryProjectPublishedState = uniqueSecondary_CVLP[0]
 
-                primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]
-                secondaryProjectProjects = secondaryProject_CVLP_Data[secondaryProjectPublishedState]
+                primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]
+                secondaryProjectProjects = secondaryProject_CVLP_Data[secondaryProjectPublishedState]["projects"]
 
                 tableRow = [componentName, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState, secondaryProjectVerion, secondaryProjectLicense,  secondaryProjectProjects, secondaryProjectPublishedState]
                 return tableRow
@@ -383,8 +397,8 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
    
     elif len(common_CVLP) == 1:  # Exact match for CVL so need to look at projects and published states
         publishedState = common_CVLP[0]
-        primaryProjectProjects = primaryProject_CVLP_Data[publishedState]
-        secondaryProjectProjects = secondaryProject_CVLP_Data[publishedState]
+        primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
+        secondaryProjectProjects = secondaryProject_CVLP_Data[publishedState]["projects"]
 
         tableRow = [componentName, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState, secondaryProjectVerion, secondaryProjectLicense,  secondaryProjectProjects, publishedState]
         return tableRow
@@ -411,7 +425,7 @@ def process_unique_component(componentVersionDetails):
                 # Get the publication states for each of the CVL items
                 publicationStates = licenses[licenseName]["publishedState"]
                 for publicationState in publicationStates:
-                    projects = licenses[licenseName]["publishedState"][publicationState]
+                    projects = licenses[licenseName]["publishedState"][publicationState]["projects"]
                     partialRows.append([version, licenseName, projects, publicationState])
 
     return partialRows

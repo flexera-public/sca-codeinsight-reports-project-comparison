@@ -238,27 +238,52 @@ def generate_html_report(reportData):
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
 
-        tdclass = "text-left" if "V" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+        tdclass = "text-left" if "V" in matchType or "un" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectVersion))
         
-        tdclass = 'text-left' if "L" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+        tdclass = 'text-left' if "L" in matchType or "un" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectLicense))
 
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %('<br>'.join(primaryProjectProjects)))
+        # Provide hyperlinks to inventory item for each item within the projct        
+        if primaryProjectProjects == ["&nbsp"]:
+            html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
+        else:
+            html_ptr.write("            <td class='text-left'>")
+            
+            projectNames = primaryProjectProjects.keys()
+            for projectName in projectNames:
+                inventoryLinks = primaryProjectProjects[projectName]
+                for inventoryLink in inventoryLinks:                    
+                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
+                     
+            html_ptr.write("</th>\n")
               
         if includeUnpublishedInventory:
-            tdclass = 'text-left' if "P" in matchType or matchType is "uniquePrimaryProject" else "td-nomatch text-left"
+            tdclass = 'text-left' if "P" in matchType or "un" in matchType else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectPublicationState))
 
-        tdclass = 'text-left' if "V" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+        tdclass = 'text-left' if "V" in matchType or "un" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectVersion))
-        tdclass = 'text-left' if "L" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+        tdclass = 'text-left' if "L" in matchType or "un" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectLicense))
         
-        html_ptr.write("            <td class='text-left'>%s</th>\n" %('<br>'.join(secondaryProjectProjects))) 
-                
+        # Provide hyperlinks to inventory item for each item within the projct        
+        if secondaryProjectProjects == ["&nbsp"]:
+            html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
+        else:
+            html_ptr.write("            <td class='text-left'>")
+            
+            projectNames = secondaryProjectProjects.keys()
+            for projectName in projectNames:
+                inventoryLinks = secondaryProjectProjects[projectName]
+                for inventoryLink in inventoryLinks:                    
+                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
+                     
+            html_ptr.write("</th>\n")
+
+
         if includeUnpublishedInventory:
-            tdclass = 'text-left' if "P" in matchType or matchType is "uniqueSecondaryProject" else "td-nomatch text-left"
+            tdclass = 'text-left' if "P" in matchType or "un" in matchType else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondatryProjectPublicationState))
 
         html_ptr.write("        </tr>\n") 
@@ -336,7 +361,7 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("V") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("V") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
                 }
             );
             table.draw();
@@ -346,7 +371,7 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("L") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("L") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
                 }
             );
             table.draw();
@@ -356,7 +381,7 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("P") || $(table.row(dataIndex).node()).attr('matchType').includes("unique") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("P") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
                 }
             );
             table.draw();

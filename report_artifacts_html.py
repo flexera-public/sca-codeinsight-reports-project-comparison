@@ -162,6 +162,10 @@ def generate_html_report(reportData):
         html_ptr.write('''        <button id="showPublishedDifferences" type="button" class="btn btn-revenera-gray">Show Published State Differences</button>\n''')
         html_ptr.write('''    </div>\n''')
 
+    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="unreconcilable">''')
+    html_ptr.write('''        <button id="showUnreconcilable" type="button" class="btn btn-revenera-gray">Unreconcilable Components</button>\n''')
+    html_ptr.write('''    </div>\n''')
+
     html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="primary">''')
     html_ptr.write('''        <button id="showUniquePrimaryProject" type="button" class="btn btn-revenera-gray">Show Components Only in %s</button>\n'''%primaryProjectName)
     html_ptr.write('''    </div>\n''')
@@ -358,6 +362,16 @@ def generate_html_report(reportData):
             table.draw();
             }); 
 
+            $("#showUnreconcilable").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return $(table.row(dataIndex).node()).attr('matchType') == "unreconcilable";                }
+            );
+            table.draw();
+            }); 
+
+                   
 
 
             $("#showUniquePrimaryProject").click(function() {

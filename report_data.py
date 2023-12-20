@@ -60,29 +60,29 @@ def gather_data_for_report(baseURL, authToken, reportData):
     # Get data for the components that are in common to both reports
     for componentId in commonComponents:
         componentName = primaryProjectInventoryData[componentId]["componentName"]
-        tableRow = compare_CV(componentName, primaryProjectInventoryData[componentId], secondaryProjectInventoryData[componentId])
+        tableRows = compare_CV(componentName, primaryProjectInventoryData[componentId], secondaryProjectInventoryData[componentId])
 
-        # Based on the results determine the matchType
-        
-        primaryProjectVersion =    tableRow[1] 
-        primaryProjectLicense =    tableRow[2] 
-        primaryProjectPublicationState =   tableRow[4] 
-        secondaryProjectVersion =   tableRow[5] 
-        secondaryProjectLicense =  tableRow[6] 
-        secondatryProjectPublicationState =  tableRow[8] 
+        for tableRow in tableRows:
+            # Based on the results determine the matchType      
+            primaryProjectVersion =    tableRow[1] 
+            primaryProjectLicense =    tableRow[2] 
+            primaryProjectPublicationState =   tableRow[4] 
+            secondaryProjectVersion =   tableRow[5] 
+            secondaryProjectLicense =  tableRow[6] 
+            secondatryProjectPublicationState =  tableRow[8] 
 
-        matchType = "C" # At a bare minimum the components match here
+            matchType = "C" # At a bare minimum the components match here
 
-        if primaryProjectVersion == secondaryProjectVersion:
-            matchType += "V"
-        if primaryProjectLicense == secondaryProjectLicense:
-            matchType += "L"
-        if primaryProjectPublicationState == secondatryProjectPublicationState:
-            matchType += "P"
+            if primaryProjectVersion == secondaryProjectVersion:
+                matchType += "V"
+            if primaryProjectLicense == secondaryProjectLicense:
+                matchType += "L"
+            if primaryProjectPublicationState == secondatryProjectPublicationState:
+                matchType += "P"
 
 
-        tableRow.append(matchType)
-        tableData.append(tableRow)
+            tableRow.append(matchType)
+            tableData.append(tableRow)
     
     # Get data for the components that are unique to the primary project
     for component in uniquePrimaryProject_C:
@@ -223,7 +223,6 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
                 else:
-                    print("Creating new things for %s" %componentName)
                     inventoryData[componentId] = {}  # A dictionary using comp version as keys
                     inventoryData[componentId]["componentName"] = componentName
                     inventoryData[componentId]["componentVersions"] = {}  # A dictionary using selected license as keys
@@ -234,12 +233,14 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState] = []
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState].append(projectName)
 
+
     return projectList, inventoryData
 
 
 #------------------------------------------
 def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
     print("    Compare versions for %s" %componentName)
+    tableRows = []
     primaryProject_CV_Data = primaryProject_C_Data["componentVersions"]
     secondaryProject_CV_Data = secondaryProject_C_Data["componentVersions"]
 
@@ -261,17 +262,41 @@ def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
                 secondaryProjectVerion = list(secondaryProject_CV_Data.keys())[0]
 
                 tableRow = compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, secondaryProject_CV_Data, secondaryProjectVerion)
-                return tableRow
+                tableRows.append(tableRow)
+                return tableRows
             else:
                 return["TODO", "There are mulitiple versions of this component for each project", None, None, None, None, None, None, None]
         else:
-            return["TODO", "There is a difference in the number of versions for %s within each project" %componentName, primaryProject_CV_Data.keys(), secondaryProject_CV_Data.keys(), None, None, None, None, None]
-    
+            # Different number of versions for each set and none in common and no way to determine if one is an upgrade to
+            # another or not so just combine the information into a single row and mark as unreconcilable
+            
+            matchType = "unreconcilable"
+            partialRows = process_unique_component(primaryProject_CV_Data)
+
+            if "errorMsg" in partialRows:
+                return {"errorMsg", "%s for %s" %(partialRows["errorMsg"],  componentName)}
+            
+            for partialRow in partialRows:
+                tableRow = [componentName] + partialRow + [None, None, None, None, matchType]
+                tableRows.append(tableRow)
+
+            partialRows = process_unique_component(secondaryProject_CV_Data)
+
+            if "errorMsg" in partialRows:
+                return {"errorMsg", "%s for %s" %(partialRows["errorMsg"],  componentName)}
+            
+            for partialRow in partialRows:
+                tableRow = [componentName, None, None, None, None] + partialRow + [matchType]
+                tableRows.append(tableRow)
+
+            return tableRows
+
     elif len(common_CV) == 1:  # There is a single common versions match
         version = common_CV[0]
         print("        Exact version match - %s" %common_CV[0])
         tableRow = compare_CVL(componentName, primaryProject_CV_Data, version, secondaryProject_CV_Data, version)
-        return tableRow
+        tableRows.append(tableRow)
+        return tableRows
     
     else:  # There are mulitiple common versions for this component
         print("        Multiple common comp/versions")

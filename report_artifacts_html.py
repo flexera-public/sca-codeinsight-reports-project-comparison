@@ -20,7 +20,7 @@ def generate_html_report(reportData):
     reportFileNameBase = reportData["reportFileNameBase"]
     reportTimeStamp =  reportData["reportTimeStamp"] 
     primaryProjectName = reportData["primaryProjectName"]
-    secondaryProjectName = reportData["secondaryProjectName"]
+    otherProjectName = reportData["otherProjectName"]
     largestHierachy = reportData["largestHierachy"]
     reportOptions = reportData["reportOptions"]
     includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
@@ -124,12 +124,12 @@ def generate_html_report(reportData):
         html_ptr.write("    <div class='row'>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %primaryProjectName) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %otherProjectName) 
         html_ptr.write("            <div id='project_hierarchy1'></div>\n")
         html_ptr.write("        </div>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %secondaryProjectName) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %primaryProjectName) 
         html_ptr.write("            <div id='project_hierarchy2'></div>\n")
         html_ptr.write("        </div>\n")
 
@@ -187,8 +187,8 @@ def generate_html_report(reportData):
     else:
         headerColSpan = 3
 
+    html_ptr.write("            <th colspan='%s' class='text-center'><h4>%s</h4></th>\n" %(headerColSpan, otherProjectName))
     html_ptr.write("            <th colspan='%s' class='text-center'><h4>%s</h4></th>\n" %(headerColSpan, primaryProjectName))
-    html_ptr.write("            <th colspan='%s' class='text-center'><h4>%s</h4></th>\n" %(headerColSpan, secondaryProjectName))
     html_ptr.write("        </tr>\n") 
     html_ptr.write("        <tr>\n") 
     html_ptr.write("            <th class='text-center'>COMPONENT</th>\n") 
@@ -210,23 +210,24 @@ def generate_html_report(reportData):
 
     for row in tableData:
         component = row[0]
-        primaryProjectVersion =    "&nbsp" if row[1] is None else row[1] 
-        primaryProjectLicense =    "&nbsp" if row[2] is None else row[2] 
-        primaryProjectProjects =   ["&nbsp"] if row[3] is None else row[3] 
-        primaryProjectPublicationState =  "&nbsp" if row[4] is None else row[4] 
-        secondaryProjectVersion =  "&nbsp" if row[5] is None else row[5] 
-        secondaryProjectLicense = "&nbsp" if row[6] is None else row[6] 
-        secondaryProjectProjects = ["&nbsp"] if row[7] is None else row[7] 
-        secondatryProjectPublicationState = "&nbsp" if row[8] is None else row[8] 
+
+        otherProjectVersion =  "&nbsp" if row[1] is None else row[1] 
+        otherProjectLicense = "&nbsp" if row[2] is None else row[2] 
+        otherProjectProjects = ["&nbsp"] if row[3] is None else row[3] 
+        otherProjectPublicationState = "&nbsp" if row[4] is None else row[4]
+        primaryProjectVersion =    "&nbsp" if row[5] is None else row[5] 
+        primaryProjectLicense =    "&nbsp" if row[6] is None else row[6] 
+        primaryProjectProjects =   ["&nbsp"] if row[7] is None else row[7] 
+        primaryProjectPublicationState =  "&nbsp" if row[8] is None else row[8] 
         matchType = row[9] 
 
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
 
-        tdclass = "text-left" if "V" in matchType or "un" in matchType else "td-nomatch text-left"
+        tdclass = 'text-left' if "V" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectVersion))
         
-        tdclass = 'text-left' if "L" in matchType or "un" in matchType else "td-nomatch text-left"
+        tdclass = 'text-left' if "L" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectLicense))
 
         # Provide hyperlinks to inventory item for each item within the projct        
@@ -244,23 +245,23 @@ def generate_html_report(reportData):
             html_ptr.write("</th>\n")
               
         if includeUnpublishedInventory:
-            tdclass = 'text-left' if "P" in matchType or "un" in matchType else "td-nomatch text-left"
+            tdclass = 'text-left' if "P" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectPublicationState))
 
-        tdclass = 'text-left' if "V" in matchType or "un" in matchType else "td-nomatch text-left"
-        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectVersion))
-        tdclass = 'text-left' if "L" in matchType or "un" in matchType else "td-nomatch text-left"
-        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondaryProjectLicense))
+        tdclass = 'text-left' if "V" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectVersion))
+        tdclass = 'text-left' if "L" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectLicense))
         
         # Provide hyperlinks to inventory item for each item within the projct        
-        if secondaryProjectProjects == ["&nbsp"]:
+        if otherProjectProjects == ["&nbsp"]:
             html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
         else:
             html_ptr.write("            <td class='text-left'>")
             
-            projectNames = secondaryProjectProjects.keys()
+            projectNames = otherProjectProjects.keys()
             for projectName in projectNames:
-                inventoryLinks = secondaryProjectProjects[projectName]
+                inventoryLinks = otherProjectProjects[projectName]
                 for inventoryLink in inventoryLinks:                    
                     html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
                      
@@ -268,8 +269,8 @@ def generate_html_report(reportData):
 
 
         if includeUnpublishedInventory:
-            tdclass = 'text-left' if "P" in matchType or "un" in matchType else "td-nomatch text-left"
-            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, secondatryProjectPublicationState))
+            tdclass = 'text-left' if "P" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectPublicationState))
 
         html_ptr.write("        </tr>\n") 
 
@@ -313,11 +314,10 @@ def generate_html_report(reportData):
 
     if largestHierachy > 1:
         # Add the js for the project summary stacked bar charts
-        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], "project_hierarchy1")
-        generate_project_hierarchy_tree(html_ptr, reportData["secondaryProjectList"], "project_hierarchy2")
+        generate_project_hierarchy_tree(html_ptr, reportData["otherProjectList"], "project_hierarchy1")
+        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], "project_hierarchy2")
+        
     
-
-
     html_ptr.write('''
             var table = $('#comparisonData').DataTable(
                 {"lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ],}
@@ -356,7 +356,11 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("V") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("V") ||
+                             $(table.row(dataIndex).node()).attr('matchType') == "addedToPrimaryProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "removedFromOtherProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "unreconcilable"
+                    );
                 }
             );
             table.draw();
@@ -366,7 +370,11 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("L") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("L") ||
+                             $(table.row(dataIndex).node()).attr('matchType') == "addedToPrimaryProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "removedFromOtherProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "unreconcilable"
+                    );
                 }
             );
             table.draw();
@@ -376,7 +384,11 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return !($(table.row(dataIndex).node()).attr('matchType').includes("P") || $(table.row(dataIndex).node()).attr('matchType').includes("un") );
+                    return !($(table.row(dataIndex).node()).attr('matchType').includes("P") ||
+                             $(table.row(dataIndex).node()).attr('matchType') == "addedToPrimaryProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "removedFromOtherProject" ||
+                                $(table.row(dataIndex).node()).attr('matchType') == "unreconcilable"
+                    );
                 }
             );
             table.draw();
@@ -395,7 +407,7 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return $(table.row(dataIndex).node()).attr('matchType') == "uniqueSecondaryProject";
+                    return $(table.row(dataIndex).node()).attr('matchType') == "addedToPrimaryProject";
                 }
             );
             table.draw();
@@ -405,7 +417,7 @@ def generate_html_report(reportData):
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    return $(table.row(dataIndex).node()).attr('matchType') == "uniquePrimaryProject";
+                    return $(table.row(dataIndex).node()).attr('matchType') == "removedFromOtherProject";
                 }
             );
             table.draw();

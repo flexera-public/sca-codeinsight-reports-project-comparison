@@ -111,7 +111,7 @@ def main():
 
 	reportData = {}
 	reportData["primaryProjectID"] = projectID
-	reportData["secondaryProjectID"] = reportOptions["otherProjectId"]
+	reportData["otherProjectID"] = reportOptions["otherProjectId"]
 	reportData["reportName"] = reportName
 	reportData["reportVersion"] = reportVersion
 	reportData["reportOptions"] = reportOptions

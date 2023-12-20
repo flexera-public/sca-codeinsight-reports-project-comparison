@@ -22,9 +22,8 @@ licenseMappings = {}
 def gather_data_for_report(baseURL, authToken, reportData):
     logger.info("Entering gather_data_for_report")
 
-    reportOptions = reportData["reportOptions"]
     primaryProjectID = reportData["primaryProjectID"]
-    secondaryProjectID = reportData["secondaryProjectID"]
+    otherProjectID = reportData["otherProjectID"]
     largestHierachy = 0
 
     tableData = []
@@ -42,42 +41,42 @@ def gather_data_for_report(baseURL, authToken, reportData):
         largestHierachy = len(primaryProjectList)
        
     # Get inventory details for primary project
-    secondaryProjectList, secondaryProjectInventoryData = get_project_details(baseURL, authToken, secondaryProjectID, reportData)
-    secondaryProjectName = secondaryProjectList[0]["projectName"]
+    otherProjectList, otherProjectInventoryData = get_project_details(baseURL, authToken, otherProjectID, reportData)
+    otherProjectName = otherProjectList[0]["projectName"]
 
     
     # How much space will be required for the hierarchies display?
-    if len(secondaryProjectList) > largestHierachy:
-        largestHierachy = len(secondaryProjectList)
+    if len(otherProjectList) > largestHierachy:
+        largestHierachy = len(otherProjectList)
 
     setPrimaryProjectInventoryData = set(primaryProjectInventoryData)
-    setSecondaryProjectInventoryData = set(secondaryProjectInventoryData)
+    setOtherProjectInventoryData = set(otherProjectInventoryData)
 
-    commonComponents = list((setPrimaryProjectInventoryData).intersection(setSecondaryProjectInventoryData))
-    uniquePrimaryProject_C = list((setPrimaryProjectInventoryData).difference(setSecondaryProjectInventoryData))
-    uniqueSecondaryProject_C = list((setSecondaryProjectInventoryData).difference(setPrimaryProjectInventoryData))
+    commonComponents = list((setPrimaryProjectInventoryData).intersection(setOtherProjectInventoryData))
+    addedToPrimaryProject_C = list((setPrimaryProjectInventoryData).difference(setOtherProjectInventoryData))
+    removedFromOtherProject_C = list((setOtherProjectInventoryData).difference(setPrimaryProjectInventoryData))
 
     # Get data for the components that are in common to both reports
     for componentId in commonComponents:
         componentName = primaryProjectInventoryData[componentId]["componentName"]
-        tableRows = compare_CV(componentName, primaryProjectInventoryData[componentId], secondaryProjectInventoryData[componentId])
+        tableRows = compare_CV(componentName, primaryProjectInventoryData[componentId], otherProjectInventoryData[componentId])
 
         for tableRow in tableRows:
             # Based on the results determine the matchType      
-            primaryProjectVersion =    tableRow[1] 
-            primaryProjectLicense =    tableRow[2] 
-            primaryProjectPublicationState =   tableRow[4] 
-            secondaryProjectVersion =   tableRow[5] 
-            secondaryProjectLicense =  tableRow[6] 
-            secondatryProjectPublicationState =  tableRow[8] 
+            otherProjectVersion =   tableRow[1] 
+            otherProjectLicense =  tableRow[2] 
+            otherProjectPublicationState =  tableRow[4] 
+            primaryProjectVersion =    tableRow[5] 
+            primaryProjectLicense =    tableRow[6] 
+            primaryProjectPublicationState =   tableRow[8] 
 
             matchType = "C" # At a bare minimum the components match here
 
-            if primaryProjectVersion == secondaryProjectVersion:
+            if primaryProjectVersion == otherProjectVersion:
                 matchType += "V"
-            if primaryProjectLicense == secondaryProjectLicense:
+            if primaryProjectLicense == otherProjectLicense:
                 matchType += "L"
-            if primaryProjectPublicationState == secondatryProjectPublicationState:
+            if primaryProjectPublicationState == otherProjectPublicationState:
                 matchType += "P"
 
 
@@ -85,8 +84,8 @@ def gather_data_for_report(baseURL, authToken, reportData):
             tableData.append(tableRow)
     
     # Get data for the components that are unique to the primary project
-    for component in uniquePrimaryProject_C:
-        matchType = "uniquePrimaryProject"
+    for component in addedToPrimaryProject_C:
+        matchType = "addedToPrimaryProject"
         componentName = primaryProjectInventoryData[component]["componentName"]
         partialRows = process_unique_component(primaryProjectInventoryData[component]["componentVersions"])
 
@@ -97,11 +96,11 @@ def gather_data_for_report(baseURL, authToken, reportData):
             tableRow = [componentName] + partialRow + [None, None, None, None, matchType]
             tableData.append(tableRow)
 
-    # Get data for the components that are unique to the secondary project
-    for component in uniqueSecondaryProject_C:
-        matchType = "uniqueSecondaryProject"
-        componentName = secondaryProjectInventoryData[component]["componentName"]
-        partialRows = process_unique_component(secondaryProjectInventoryData[component]["componentVersions"])
+    # Get data for the components that are unique to the other project
+    for component in removedFromOtherProject_C:
+        matchType = "removedFromOtherProject"
+        componentName = otherProjectInventoryData[component]["componentName"]
+        partialRows = process_unique_component(otherProjectInventoryData[component]["componentVersions"])
 
         if "errorMsg" in partialRows:
             return {"errorMsg", "%s for %s - %s" %(partialRows["errorMsg"], component, componentName)}
@@ -115,8 +114,8 @@ def gather_data_for_report(baseURL, authToken, reportData):
 
     reportData["primaryProjectName"] = primaryProjectName
     reportData["primaryProjectList"] = primaryProjectList
-    reportData["secondaryProjectName"] = secondaryProjectName
-    reportData["secondaryProjectList"] = secondaryProjectList
+    reportData["otherProjectName"] = otherProjectName
+    reportData["otherProjectList"] = otherProjectList
     reportData["largestHierachy"] = largestHierachy
     reportData["tableData"] = tableData
   
@@ -252,30 +251,30 @@ def get_project_details(baseURL, authToken, projectID, reportData):
 
 
 #------------------------------------------
-def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
+def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
     print("    Compare versions for %s" %componentName)
     tableRows = []
     primaryProject_CV_Data = primaryProject_C_Data["componentVersions"]
-    secondaryProject_CV_Data = secondaryProject_C_Data["componentVersions"]
+    otherProject_CV_Data = otherProject_C_Data["componentVersions"]
 
     setPrimaryProject_CV_Data = set(primaryProject_CV_Data)
-    setSecondaryProject_CV_Data = set(secondaryProject_CV_Data)
+    setOtherProject_CV_Data = set(otherProject_CV_Data)
 
-    common_CV = list((setPrimaryProject_CV_Data).intersection(setSecondaryProject_CV_Data))
-    uniquePrimaryCV= list((setPrimaryProject_CV_Data).difference(setSecondaryProject_CV_Data))
-    uniqueSecondaryCV = list((setSecondaryProject_CV_Data).difference(setPrimaryProject_CV_Data))
+    common_CV = list((setPrimaryProject_CV_Data).intersection(setOtherProject_CV_Data))
+    addedToPrimaryCV= list((setPrimaryProject_CV_Data).difference(setOtherProject_CV_Data))
+    removedFromOtherCV = list((setOtherProject_CV_Data).difference(setPrimaryProject_CV_Data))
 
     if len(common_CV) == 0:          
         print("        No common versions for: %s" %(componentName))
 
-        if len(primaryProject_CV_Data) ==  len(secondaryProject_CV_Data):
+        if len(primaryProject_CV_Data) ==  len(otherProject_CV_Data):
             # There are an equal number of items in both projects
             if len(primaryProject_CV_Data) == 1:
                 # Just a simple version change what about the license
                 primaryProjectVerion = list(primaryProject_CV_Data.keys())[0]
-                secondaryProjectVerion = list(secondaryProject_CV_Data.keys())[0]
+                otherProjectVerion = list(otherProject_CV_Data.keys())[0]
 
-                tableRow = compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, secondaryProject_CV_Data, secondaryProjectVerion)
+                tableRow = compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion)
                 tableRows.append(tableRow)
                 return tableRows
             else:
@@ -291,16 +290,16 @@ def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
                 return {"errorMsg", "%s for %s" %(partialRows["errorMsg"],  componentName)}
             
             for partialRow in partialRows:
-                tableRow = [componentName] + partialRow + [None, None, None, None, matchType]
+                tableRow = [componentName, None, None, None, None] + partialRow + [matchType]
                 tableRows.append(tableRow)
 
-            partialRows = process_unique_component(secondaryProject_CV_Data)
+            partialRows = process_unique_component(otherProject_CV_Data)
 
             if "errorMsg" in partialRows:
                 return {"errorMsg", "%s for %s" %(partialRows["errorMsg"],  componentName)}
             
             for partialRow in partialRows:
-                tableRow = [componentName, None, None, None, None] + partialRow + [matchType]
+                tableRow = [componentName] + partialRow + [None, None, None, None, matchType]
                 tableRows.append(tableRow)
 
             return tableRows
@@ -308,7 +307,7 @@ def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
     elif len(common_CV) == 1:  # There is a single common versions match
         version = common_CV[0]
         print("        Exact version match - %s" %common_CV[0])
-        tableRow = compare_CVL(componentName, primaryProject_CV_Data, version, secondaryProject_CV_Data, version)
+        tableRow = compare_CVL(componentName, primaryProject_CV_Data, version, otherProject_CV_Data, version)
         tableRows.append(tableRow)
         return tableRows
     
@@ -318,92 +317,93 @@ def compare_CV(componentName, primaryProject_C_Data, secondaryProject_C_Data):
 
 
   #------------------------------------------
-def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, secondaryProject_CV_Data, secondaryProjectVerion):
+def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion):
 
     primaryProject_CVL_Data = primaryProject_CV_Data[primaryProjectVerion]["licenses"]
-    secondaryProject_CVL_Data = secondaryProject_CV_Data[secondaryProjectVerion]["licenses"]
+    otherProject_CVL_Data = otherProject_CV_Data[otherProjectVerion]["licenses"]
 
-    print("        Compare licenses for %s : %s vs %s" %(componentName, primaryProjectVerion, secondaryProjectVerion))
+    print("        Compare licenses for %s : %s vs %s" %(componentName, primaryProjectVerion, otherProjectVerion))
 
     setprimaryProject_CVL_Data = set(primaryProject_CVL_Data)
-    setsecondaryProject_CVL_Data = set(secondaryProject_CVL_Data)
+    setotherProject_CVL_Data = set(otherProject_CVL_Data)
 
-    common_CVL = list((setprimaryProject_CVL_Data).intersection(setsecondaryProject_CVL_Data))
-    uniquePrimary_CVL = list((setprimaryProject_CVL_Data).difference(setsecondaryProject_CVL_Data))
-    uniqueSecondary_CVL = list((setsecondaryProject_CVL_Data).difference(setprimaryProject_CVL_Data))  
+    common_CVL = list((setprimaryProject_CVL_Data).intersection(setotherProject_CVL_Data))
+    addedToPrimary_CVL = list((setprimaryProject_CVL_Data).difference(setotherProject_CVL_Data))
+    removedFromOther_CVL = list((setotherProject_CVL_Data).difference(setprimaryProject_CVL_Data))  
 
     if len(common_CVL) == 0: 
-        if len(uniquePrimary_CVL) == len(uniqueSecondary_CVL):
+        if len(addedToPrimary_CVL) == len(removedFromOther_CVL):
             # Equal number of unique CVL items from each hierarchy
-            if len(uniquePrimary_CVL) == 1:
+            if len(addedToPrimary_CVL) == 1:
                 
-                primaryProjectLicense = uniquePrimary_CVL[0]
-                secondaryProjectLicense = uniqueSecondary_CVL[0]
+                primaryProjectLicense = addedToPrimary_CVL[0]
+                otherProjectLicense = removedFromOther_CVL[0]
 
-                tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, secondaryProject_CVL_Data, secondaryProjectVerion, secondaryProjectLicense)
+                tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense)
 
                 return tableRow
             else:
-                return["TODO", "Multiple license for  %s-%s-%s" %(componentName, primaryProjectVerion, secondaryProjectVerion), None, None, None, None, None, None, None, None]
+                return["TODO", "Multiple license for  %s-%s-%s" %(componentName, primaryProjectVerion, otherProjectVerion), None, None, None, None, None, None, None, None]
         else:
-            return["TODO", "Unequal quanity of license for %s-%s-%s" %(componentName, primaryProjectVerion, secondaryProjectVerion), None, None, None, None, None, None, None, None]
+            return["TODO", "Unequal quanity of license for %s-%s-%s" %(componentName, primaryProjectVerion, otherProjectVerion), None, None, None, None, None, None, None, None]
     
 
     elif len(common_CVL) == 1:  # Exact match for CVL so need to look at projects and published states
         license = common_CVL[0]
         print("            Exact license match - %s" %license)
  
-        tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, secondaryProject_CVL_Data, secondaryProjectVerion, license)
+        tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, otherProject_CVL_Data, otherProjectVerion, license)
         return tableRow
     else:
-        print("            Mutliple common licenses for  %s-%s-%s" %(componentName, primaryProjectVerion, secondaryProjectVerion))
-        return["TODO", "Muliple Common Licenses for %s-%s-%s" %(componentName, primaryProjectVerion, secondaryProjectVerion), None, None, None, None, None, None, None, None]
+        print("            Mutliple common licenses for  %s-%s-%s" %(componentName, primaryProjectVerion, otherProjectVerion))
+        return["TODO", "Muliple Common Licenses for %s-%s-%s" %(componentName, primaryProjectVerion, otherProjectVerion), None, None, None, None, None, None, None, None]
 
 
 #------------------------------
-def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, secondaryProject_CVL_Data, secondaryProjectVerion, secondaryProjectLicense):
+def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense):
 
     primaryProject_CVLP_Data = primaryProject_CVL_Data[primaryProjectLicense]["publishedState"]
-    secondaryProject_CVLP_Data = secondaryProject_CVL_Data[secondaryProjectLicense]["publishedState"]
+    otherProject_CVLP_Data = otherProject_CVL_Data[otherProjectLicense]["publishedState"]
        
-    print("            Compare published state for %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, secondaryProjectVerion, secondaryProjectLicense))
+    print("            Compare published state for %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, otherProjectVerion, otherProjectLicense))
 
     setprimaryProject_CVLP_Data = set(primaryProject_CVLP_Data)
-    setsecondaryProject_CVLP_Data = set(secondaryProject_CVLP_Data)
+    setotherProject_CVLP_Data = set(otherProject_CVLP_Data)
 
-    common_CVLP = list((setprimaryProject_CVLP_Data).intersection(setsecondaryProject_CVLP_Data))
-    uniquePrimary_CVLP = list((setprimaryProject_CVLP_Data).difference(setsecondaryProject_CVLP_Data))
-    uniqueSecondary_CVLP = list((setsecondaryProject_CVLP_Data).difference(setprimaryProject_CVLP_Data))  
+    common_CVLP = list((setprimaryProject_CVLP_Data).intersection(setotherProject_CVLP_Data))
+    addedToPrimary_CVLP = list((setprimaryProject_CVLP_Data).difference(setotherProject_CVLP_Data))
+    removedFromOther_CVLP = list((setotherProject_CVLP_Data).difference(setprimaryProject_CVLP_Data))  
 
     if len(common_CVLP) == 0:          
-        if len(uniquePrimary_CVLP) == len(uniqueSecondary_CVLP):
+        if len(addedToPrimary_CVLP) == len(removedFromOther_CVLP):
             # Equal number of unique CVL items from each hierarchy
-            if len(uniquePrimary_CVLP) == 1:
+            if len(addedToPrimary_CVLP) == 1:
                 
-                primaryProjectPublishedState = uniquePrimary_CVLP[0]
-                secondaryProjectPublishedState = uniqueSecondary_CVLP[0]
+                primaryProjectPublishedState = addedToPrimary_CVLP[0]
+                otherProjectPublishedState = removedFromOther_CVLP[0]
 
                 primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]
-                secondaryProjectProjects = secondaryProject_CVLP_Data[secondaryProjectPublishedState]["projects"]
+                otherProjectProjects = otherProject_CVLP_Data[otherProjectPublishedState]["projects"]
 
-                tableRow = [componentName, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState, secondaryProjectVerion, secondaryProjectLicense,  secondaryProjectProjects, secondaryProjectPublishedState]
+                tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, otherProjectPublishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState]
+
                 return tableRow
             
             else:
-                return["TODO", "Equal but different counts for published state of %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, secondaryProjectVerion, secondaryProjectLicense), None, None, None, None, None, None, None, None]
+                return["TODO", "Equal but different counts for published state of %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, otherProjectVerion, otherProjectLicense), None, None, None, None, None, None, None, None]
         else:
-            return["TODO", "Differing counts for published state of %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, secondaryProjectVerion, secondaryProjectLicense), None, None, None, None, None, None, None, None]     
+            return["TODO", "Differing counts for published state of %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, otherProjectVerion, otherProjectLicense), None, None, None, None, None, None, None, None]     
 
    
     elif len(common_CVLP) == 1:  # Exact match for CVL so need to look at projects and published states
         publishedState = common_CVLP[0]
         primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
-        secondaryProjectProjects = secondaryProject_CVLP_Data[publishedState]["projects"]
+        otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
 
-        tableRow = [componentName, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState, secondaryProjectVerion, secondaryProjectLicense,  secondaryProjectProjects, publishedState]
+        tableRow = [componentName, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState, otherProjectVerion, otherProjectLicense,  otherProjectProjects, publishedState]
         return tableRow
     else:
-        return["TODO", "Mutliple publication states %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, secondaryProjectVerion, secondaryProjectLicense), None, None, None, None, None, None, None, None]
+        return["TODO", "Mutliple publication states %s : %s-%s vs %s-%s" %(componentName, primaryProjectVerion, primaryProjectLicense, otherProjectVerion, otherProjectLicense), None, None, None, None, None, None, None, None]
 
 
 #------------------------------

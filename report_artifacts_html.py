@@ -57,9 +57,10 @@ def generate_html_report(reportData):
     html_ptr.write("        <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'> \n")
 
     html_ptr.write(''' 
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+        <link rel="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/themes/default/style.min.css">              
     ''')
 
 
@@ -137,42 +138,26 @@ def generate_html_report(reportData):
 
         html_ptr.write("<hr class='small'>")
 
-    html_ptr.write('''<div class="btn-toolbar" role="toolbar" aria-label="button toolbar">\n''')
+    html_ptr.write('''<div class="btn-group" role="group" aria-label="Button group with nested dropdown">''')
 
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="all">''')
-    html_ptr.write('''         <button id="reset" type="button" class="btn btn-revenera-gray">Show All Inventory</button>\n''')
-    html_ptr.write('''    </div>\n''')
+    
+    html_ptr.write('''  <button id="showAll" type="button" class="btn btn-revenera-gray mx-1 my-2">Show All</button>\n''')
+    html_ptr.write('''  <button id="showUnchanged" type="button" class="btn btn-revenera-gray mx-2 my-2">Show Unchanged</button>\n''')
 
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="common" >''')
-    html_ptr.write('''        <button  type="button" class="btn  btn-revenera-gray" id="showExact">Show Common Inventory</button>\n''')
-    html_ptr.write('''    </div>\n''')
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="diffs">''')
-    html_ptr.write('''        <button id="hideExact" type="button" class="btn btn-revenera-gray">Show All Differences</button>\n''')
-    html_ptr.write('''    </div>\n''')
-
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="version">''')
-    html_ptr.write('''        <button id="showVersionDifferences" type="button" class="btn btn-revenera-gray">Show Version Differences</button>\n''')
-    html_ptr.write('''    </div>\n''')
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="license">''')
-    html_ptr.write('''        <button id="showLicenseDifferences" type="button" class="btn btn-revenera-gray">Show License Differences</button>\n''')
-    html_ptr.write('''    </div>\n''')
-
+    html_ptr.write('''  <div class="btn-group" role="group">''')
+    html_ptr.write('''   <button type="button" class="btn btn-revenera-gray mx-1 my-2 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Show Differences</button>''')
+    html_ptr.write('''   <div class="dropdown-menu">''')
+    html_ptr.write('''       <button id="showAllDifferences" class="dropdown-item" type="button">All</button>''')
+    html_ptr.write('''       <button id="showVersionDifferences" class="dropdown-item" type="button">Versions</button>''')
+    html_ptr.write('''       <button id="showLicenseDifferences" class="dropdown-item" type="button">Licenses</button>''')
     if includeUnpublishedInventory:
-        html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="published">''')
-        html_ptr.write('''        <button id="showPublishedDifferences" type="button" class="btn btn-revenera-gray">Show Published State Differences</button>\n''')
-        html_ptr.write('''    </div>\n''')
-
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="unreconcilable">''')
-    html_ptr.write('''        <button id="showUnreconcilable" type="button" class="btn btn-revenera-gray">Unreconcilable Components</button>\n''')
-    html_ptr.write('''    </div>\n''')
-
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="primary">''')
-    html_ptr.write('''        <button id="showUniquePrimaryProject" type="button" class="btn btn-revenera-gray">Show Components Only in %s</button>\n'''%primaryProjectName)
-    html_ptr.write('''    </div>\n''')
-    html_ptr.write('''    <div class="btn-group mr-2" role="group" aria-label="secondary">''')
-    html_ptr.write('''        <button id="showUniqueSecondaryProject" type="button" class="btn btn-revenera-gray">Show Components Only in %s</button>\n''' %secondaryProjectName)
-    html_ptr.write('''    </div>\n''')
-    html_ptr.write('''</div>\n''')
+        html_ptr.write('''       <button id="showPublishedDifferences" class="dropdown-item" type="button">Published State</button>''')
+    html_ptr.write('''       <button id="showUnreconcilable" class="dropdown-item" type="button">Unreconcilable</button>''')
+    html_ptr.write('''   </div>''')
+    html_ptr.write('''  </div>''')
+    html_ptr.write('''</div>   ''')
+    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-revenera-gray mx-1 my-2">Show Added</button>\n''')
+    html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-revenera-gray mx-1 my-2">Show Removed</button>\n''')
 
     html_ptr.write('''<p>''')
     html_ptr.write('''<p>''')
@@ -313,10 +298,13 @@ def generate_html_report(reportData):
 
     html_ptr.write('''
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>  
-    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.10/jstree.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>   
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>  
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/jstree.min.js"></script>
 
     ''')
 
@@ -335,7 +323,14 @@ def generate_html_report(reportData):
                 {"lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ],}
             );
 
-            $("#showExact").click(function() {
+                     
+            $("#showAll").click(function() {
+                $.fn.dataTable.ext.search.pop();
+                table.draw();
+            });
+
+
+            $("#showUnchanged").click(function() {
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
@@ -346,7 +341,7 @@ def generate_html_report(reportData):
             }); 
 
                    
-            $("#hideExact").click(function() {
+            $("#showAllDifferences").click(function() {
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
@@ -395,21 +390,8 @@ def generate_html_report(reportData):
             );
             table.draw();
             }); 
-
-                   
-
-
-            $("#showUniquePrimaryProject").click(function() {
-                $.fn.dataTable.ext.search.pop();
-                $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    return $(table.row(dataIndex).node()).attr('matchType') == "uniquePrimaryProject";
-                }
-            );
-            table.draw();
-            }); 
-
-            $("#showUniqueSecondaryProject").click(function() {
+               
+            $("#showAdded").click(function() {
                 $.fn.dataTable.ext.search.pop();
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
@@ -418,12 +400,16 @@ def generate_html_report(reportData):
             );
             table.draw();
             }); 
-                 
-  
-            $("#reset").click(function() {
+                
+            $("#showRemoved").click(function() {
                 $.fn.dataTable.ext.search.pop();
-                table.draw();
-            });
+                $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    return $(table.row(dataIndex).node()).attr('matchType') == "uniquePrimaryProject";
+                }
+            );
+            table.draw();
+            }); 
 
 
             $(document).ready(function () {

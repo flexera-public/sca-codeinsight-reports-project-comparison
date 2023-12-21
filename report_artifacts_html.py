@@ -80,6 +80,7 @@ def generate_html_report(reportData):
     # TODO Add to css file
     html_ptr.write(" .tr-notExactMatch { background-color: #F0F0F0;}\n")
     html_ptr.write(" .td-nomatch { color: #F80000;}\n")
+    html_ptr.write(" .btn-comparison {  width:250px; background-color: #323E48; color: #FFFFFF;}\n")
     # To keep the filter button a different color after it was clicked
     html_ptr.write(".active {  background-color: #89EE46; color: #000000; outline-color: red;}")
 
@@ -138,29 +139,33 @@ def generate_html_report(reportData):
 
         html_ptr.write("<hr class='small'>")
 
-    html_ptr.write('''<div class="btn-group" role="group" aria-label="Button group with nested dropdown">''')
+    html_ptr.write('''<div style="text-align: center;">''')
+    html_ptr.write('''  <div class="btn-group" role="group" aria-label="data filters"">\n''')   
+    html_ptr.write('''      <button id="showAll" type="button" class="btn-comparison mx-1 my-2">Show All</button>\n''')
+    html_ptr.write('''      <button id="showUnchanged" type="button" class="btn btn-comparison mx-2 my-2">Show Unchanged</button>\n''')
 
+    html_ptr.write('''      <div class="btn-group " role="group">\n''')
     
-    html_ptr.write('''  <button id="showAll" type="button" class="btn btn-revenera-gray mx-1 my-2">Show All</button>\n''')
-    html_ptr.write('''  <button id="showUnchanged" type="button" class="btn btn-revenera-gray mx-2 my-2">Show Unchanged</button>\n''')
-
-    html_ptr.write('''  <div class="btn-group" role="group">''')
-    html_ptr.write('''   <button type="button" class="btn btn-revenera-gray mx-1 my-2 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Show Differences</button>''')
-    html_ptr.write('''   <div class="dropdown-menu">''')
-    html_ptr.write('''       <button id="showAllDifferences" class="dropdown-item" type="button">All</button>''')
-    html_ptr.write('''       <button id="showVersionDifferences" class="dropdown-item" type="button">Versions</button>''')
-    html_ptr.write('''       <button id="showLicenseDifferences" class="dropdown-item" type="button">Licenses</button>''')
+    html_ptr.write('''          <button id="showDifferences" type="button" class="btn btn-comparison mx-1 my-2 dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Show Differences</button>\n''')
+    html_ptr.write('''          <div class="dropdown-menu" role="group" aria-labelledby="dropdownMenu">\n''')
+    html_ptr.write('''              <button id="showAllDifferences" class="dropdown-item" type="button" onclick="showDifference(this)">All Differences</button>\n''')
+    html_ptr.write('''              <button id="showVersionDifferences" class="dropdown-item" type="button" onclick="showDifference(this)">Versions Differences</button>\n''')
+    html_ptr.write('''              <button id="showLicenseDifferences" class="dropdown-item" type="button" onclick="showDifference(this)">Licenses Differences</button>\n''')
     if includeUnpublishedInventory:
-        html_ptr.write('''       <button id="showPublishedDifferences" class="dropdown-item" type="button">Published State</button>''')
-    html_ptr.write('''       <button id="showUnreconcilable" class="dropdown-item" type="button">Unreconcilable</button>''')
-    html_ptr.write('''   </div>''')
-    html_ptr.write('''  </div>''')
-    html_ptr.write('''</div>   ''')
-    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-revenera-gray mx-1 my-2">Show Added</button>\n''')
-    html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-revenera-gray mx-1 my-2">Show Removed</button>\n''')
+        html_ptr.write('''          <button id="showPublishedDifferences" class="dropdown-item" type="button" onclick="showDifference(this)">Published State</button>\n''')
+    html_ptr.write('''              <button id="showUnreconcilable" class="dropdown-item" type="button" onclick="showDifference(this)">Unreconcilable Items</button>\n''')
+    html_ptr.write('''          </div>\n''')
+    html_ptr.write('''      </div>\n''')
+    
+    html_ptr.write('''  </div>\n''')
 
-    html_ptr.write('''<p>''')
-    html_ptr.write('''<p>''')
+    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-comparison mx-1 my-2">Show Added</button>\n''')
+    html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-comparison mx-1 my-2">Show Removed</button>\n''')
+
+    html_ptr.write('''</div>\n''')
+
+    html_ptr.write('''<p>\n''')
+    html_ptr.write('''<p>\n''')
 
     html_ptr.write("<table id='comparisonData' class='table table-hover row-border table-sm' style='width:90%'>\n")
 
@@ -234,13 +239,13 @@ def generate_html_report(reportData):
         if primaryProjectProjects == ["&nbsp"]:
             html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
         else:
-            html_ptr.write("            <td class='text-left'>")
+            html_ptr.write("            <td class='text-left'\n>")
             
             projectNames = primaryProjectProjects.keys()
             for projectName in projectNames:
                 inventoryLinks = primaryProjectProjects[projectName]
                 for inventoryLink in inventoryLinks:                    
-                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
+                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>\n" %(inventoryLink, projectName))
                      
             html_ptr.write("</th>\n")
               
@@ -323,15 +328,23 @@ def generate_html_report(reportData):
                 {"lengthMenu": [ [25, 50, 100, -1], [25, 50, 100, "All"] ],}
             );
 
-                     
+            // Used to change the button text to the value of the selected filter 
+            // from within the dropdown list      
+            function showDifference(item) {
+                document.getElementById('showDifferences').innerHTML = item.innerHTML;
+            }
+
+
             $("#showAll").click(function() {
                 $.fn.dataTable.ext.search.pop();
+                document.getElementById('showDifferences').innerHTML = "Show Differences";
                 table.draw();
             });
 
 
             $("#showUnchanged").click(function() {
                 $.fn.dataTable.ext.search.pop();
+                document.getElementById('showDifferences').innerHTML = "Show Differences";
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     return $(table.row(dataIndex).node()).attr('matchType') == "CVLP";
@@ -405,6 +418,7 @@ def generate_html_report(reportData):
                
             $("#showAdded").click(function() {
                 $.fn.dataTable.ext.search.pop();
+                document.getElementById('showDifferences').innerHTML = "Show Differences";
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     return $(table.row(dataIndex).node()).attr('matchType') == "addedToPrimaryProject";
@@ -415,6 +429,7 @@ def generate_html_report(reportData):
                 
             $("#showRemoved").click(function() {
                 $.fn.dataTable.ext.search.pop();
+                document.getElementById('showDifferences').innerHTML = "Show Differences";
                 $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     return $(table.row(dataIndex).node()).attr('matchType') == "removedFromOtherProject";

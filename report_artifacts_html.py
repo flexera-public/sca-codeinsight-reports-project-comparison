@@ -234,6 +234,31 @@ def generate_html_report(reportData):
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)
         html_ptr.write("            <td class='text-left'>%s</th>\n" %(component))
 
+        
+
+        tdclass = 'text-left' if "V" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectVersion))
+        tdclass = 'text-left' if "L" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectLicense))
+        
+        # Provide hyperlinks to inventory item for each item within the projct        
+        if otherProjectProjects == ["&nbsp"]:
+            html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
+        else:
+            html_ptr.write("            <td class='text-left'>")
+            
+            projectNames = otherProjectProjects.keys()
+            for projectName in projectNames:
+                inventoryLinks = otherProjectProjects[projectName]
+                for inventoryLink in inventoryLinks:                    
+                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
+                     
+            html_ptr.write("</th>\n")
+
+        if includeUnpublishedInventory:
+            tdclass = 'text-left' if "P" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
+            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectPublicationState))
+
         tdclass = 'text-left' if "V" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
         html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectVersion))
         
@@ -258,29 +283,7 @@ def generate_html_report(reportData):
             tdclass = 'text-left' if "P" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
             html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, primaryProjectPublicationState))
 
-        tdclass = 'text-left' if "V" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
-        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectVersion))
-        tdclass = 'text-left' if "L" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
-        html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectLicense))
-        
-        # Provide hyperlinks to inventory item for each item within the projct        
-        if otherProjectProjects == ["&nbsp"]:
-            html_ptr.write("            <td class='text-left'>&nbsp</th>\n")
-        else:
-            html_ptr.write("            <td class='text-left'>")
-            
-            projectNames = otherProjectProjects.keys()
-            for projectName in projectNames:
-                inventoryLinks = otherProjectProjects[projectName]
-                for inventoryLink in inventoryLinks:                    
-                    html_ptr.write("<a href='%s' target='_blank' >%s</a><br>" %(inventoryLink, projectName))
-                     
-            html_ptr.write("</th>\n")
 
-
-        if includeUnpublishedInventory:
-            tdclass = 'text-left' if "P" in matchType or "added" in matchType  or "removed" in matchType or "unreconcilable" in matchType else "td-nomatch text-left"
-            html_ptr.write("            <td class='%s'>%s</th>\n" %(tdclass, otherProjectPublicationState))
 
         html_ptr.write("        </tr>\n") 
 

@@ -141,8 +141,8 @@ def generate_html_report(reportData):
 
     html_ptr.write('''<div style="text-align: center;">''')
     html_ptr.write('''  <div class="btn-group" role="group" aria-label="data filters"">\n''')   
-    html_ptr.write('''      <button id="showAll" type="button" class="btn-comparison mx-1 my-2">Show All</button>\n''')
-    html_ptr.write('''      <button id="showUnchanged" type="button" class="btn btn-comparison mx-2 my-2">Show Unchanged</button>\n''')
+    html_ptr.write('''      <button id="showAll" type="button" class="btn-comparison mx-1 my-2">Show All Items</button>\n''')
+    html_ptr.write('''      <button id="showUnchanged" type="button" class="btn btn-comparison mx-2 my-2">Show Unchanged Items</button>\n''')
 
     html_ptr.write('''      <div class="btn-group " role="group">\n''')
     
@@ -159,8 +159,8 @@ def generate_html_report(reportData):
     
     html_ptr.write('''  </div>\n''')
 
-    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-comparison mx-1 my-2">Show Added</button>\n''')
-    html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-comparison mx-1 my-2">Show Removed</button>\n''')
+    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-comparison mx-1 my-2">Show Added Items</button>\n''')
+    html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-comparison mx-1 my-2">Show Removed Items</button>\n''')
 
     html_ptr.write('''</div>\n''')
 
@@ -206,7 +206,7 @@ def generate_html_report(reportData):
     html_ptr.write("            <th class='text-center'>LICENSE</th>\n")
     html_ptr.write("            <th class='text-center'>PROJECTS</th>\n")
     if includeUnpublishedInventory:
-        html_ptr.write("            <th class='text-center'>PUBLISHEDSTATE</th>\n")
+        html_ptr.write("            <th class='text-center'>PUBLISHED STATE</th>\n")
 
     html_ptr.write("        </tr>\n")
     html_ptr.write("    </thead>\n")  
@@ -220,10 +220,15 @@ def generate_html_report(reportData):
         otherProjectLicense = "&nbsp" if row[2] is None else row[2] 
         otherProjectProjects = ["&nbsp"] if row[3] is None else row[3] 
         otherProjectPublicationState = "&nbsp" if row[4] is None else row[4]
+
+        otherProjectPublicationState = "Published" if otherProjectPublicationState == "PUBLISHED" and otherProjectPublicationState != "&nbsp" else "Not Published"
+
+
         primaryProjectVersion =    "&nbsp" if row[5] is None else row[5] 
         primaryProjectLicense =    "&nbsp" if row[6] is None else row[6] 
         primaryProjectProjects =   ["&nbsp"] if row[7] is None else row[7] 
-        primaryProjectPublicationState =  "&nbsp" if row[8] is None else row[8] 
+        primaryProjectPublicationState =  "&nbsp" if row[8] is None else row[8]
+        primaryProjectPublicationState = "Published" if primaryProjectPublicationState == "PUBLISHED" and primaryProjectPublicationState != "&nbsp" else "Not Published" 
         matchType = row[9] 
 
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)

@@ -159,8 +159,9 @@ def generate_html_report(reportData):
     
     html_ptr.write('''  </div>\n''')
 
-    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-comparison mx-1 my-2">Show Added Items</button>\n''')
     html_ptr.write('''  <button id="showRemoved" type="button" class="btn btn-comparison mx-1 my-2">Show Removed Items</button>\n''')
+    html_ptr.write('''  <button id="showAdded" type="button" class="btn btn-comparison mx-1 my-2">Show Added Items</button>\n''')
+    
 
     html_ptr.write('''</div>\n''')
 
@@ -221,14 +222,10 @@ def generate_html_report(reportData):
         otherProjectProjects = ["&nbsp"] if row[3] is None else row[3] 
         otherProjectPublicationState = "&nbsp" if row[4] is None else row[4]
 
-        otherProjectPublicationState = "Published" if otherProjectPublicationState == "PUBLISHED" and otherProjectPublicationState != "&nbsp" else "Not Published"
-
-
         primaryProjectVersion =    "&nbsp" if row[5] is None else row[5] 
         primaryProjectLicense =    "&nbsp" if row[6] is None else row[6] 
         primaryProjectProjects =   ["&nbsp"] if row[7] is None else row[7] 
         primaryProjectPublicationState =  "&nbsp" if row[8] is None else row[8]
-        primaryProjectPublicationState = "Published" if primaryProjectPublicationState == "PUBLISHED" and primaryProjectPublicationState != "&nbsp" else "Not Published" 
         matchType = row[9] 
 
         html_ptr.write("        <tr matchType='%s'> \n" %matchType)

@@ -326,8 +326,8 @@ def generate_html_report(reportData):
 
     if largestHierachy > 1:
         # Add the js for the project summary stacked bar charts
-        generate_project_hierarchy_tree(html_ptr, reportData["otherProjectList"], otherProjectInventoryCount, "project_hierarchy1")
-        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], primaryProjectInventoryCount, "project_hierarchy2")
+        generate_project_hierarchy_tree(html_ptr, reportData["otherProjectList"], otherProjectInventoryCount, primaryProjectInventoryCount, "project_hierarchy1")
+        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], primaryProjectInventoryCount, otherProjectInventoryCount, "project_hierarchy2")
         
     
     html_ptr.write('''
@@ -480,20 +480,29 @@ def encodeImage(imageFile):
         raise
 
 #----------------------------------------------------------------------------------------#
-def generate_project_hierarchy_tree(html_ptr, projectHierarchy, projectInventoryCount, chartIdentifier):
+def generate_project_hierarchy_tree(html_ptr, projectHierarchy, thisProjectInventoryCount, otherProjectInventoryCount, chartIdentifier):
     logger.info("Entering generate_project_hierarchy_tree")
+
+    projectIDList = list((otherProjectInventoryCount.keys()))  # Get the project IDs for the comparison project
 
     html_ptr.write('''var hierarchy = [\n''')
 
     for project in projectHierarchy:
 
+        projectID = project["projectID"]
+
         # is this the top most parent or a child project with a parent
         if "uniqueID" in project:
             projectIdentifier = project["uniqueID"]
         else:
-            projectIdentifier = project["projectID"]
+            projectIdentifier = projectID
 
-        inventoryCount = projectInventoryCount[project["projectID"]]
+        inventoryCount = thisProjectInventoryCount[projectID]
+
+        if projectID in projectIDList:
+            linkColor = "lime"
+        else:
+            linkColor = "black"
 
         html_ptr.write('''{
             'id': '%s', 
@@ -501,8 +510,11 @@ def generate_project_hierarchy_tree(html_ptr, projectHierarchy, projectInventory
             'text': '%s (%s items)',
             'a_attr': {
                 'href': '%s'
-            }
-        },\n'''  %(projectIdentifier, project["parent"], project["projectName"], inventoryCount, project["projectLink"]))
+            },
+			'li_attr' : {
+				'style' : 'color: %s;'
+			}
+        },\n'''  %(projectIdentifier, project["parent"], project["projectName"], inventoryCount, project["projectLink"], linkColor))
 
     html_ptr.write('''\n]''')
 

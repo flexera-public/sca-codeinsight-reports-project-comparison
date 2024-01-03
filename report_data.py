@@ -425,25 +425,33 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
     removedFromOther_CVLP = list((setotherProject_CVLP_Data).difference(setprimaryProject_CVLP_Data))  
 
     if len(common_CVLP) == 0:          
-        if len(addedToPrimary_CVLP) == len(removedFromOther_CVLP):
-            # Equal number of unique CVL items from each hierarchy
-            if len(addedToPrimary_CVLP) == 1:
-                
-                primaryProjectPublishedState = addedToPrimary_CVLP[0]
-                otherProjectPublishedState = removedFromOther_CVLP[0]
+        if len(addedToPrimary_CVLP) == len(removedFromOther_CVLP) and len(addedToPrimary_CVLP) == 1:
+            # Just a single CVL items from each hierarchy so assume a change between projects          
+            primaryProjectPublishedState = addedToPrimary_CVLP[0]
+            otherProjectPublishedState = removedFromOther_CVLP[0]
 
-                primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]
-                otherProjectProjects = otherProject_CVLP_Data[otherProjectPublishedState]["projects"]
+            primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]
+            otherProjectProjects = otherProject_CVLP_Data[otherProjectPublishedState]["projects"]
 
-                tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, otherProjectPublishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState]
-                tableRows.append(tableRow)
-                return tableRows
-            
-            else:
-                return[[componentName, None, None, None, None, "TODO", "Equal but different counts for published state", None, None]]
+            tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, otherProjectPublishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState]
+            tableRows.append(tableRow)
+            return tableRows
             
         else:
-            return[[componentName, None, None, None, None, "TODO", "Differing counts for published state", None, None]]
+            #There are more than single non common CVLP match so print them out
+            if len(addedToPrimary_CVLP) !=0:
+                matchType = "addedToPrimaryProject"
+                for publishedState in addedToPrimary_CVLP:
+                    primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
+                    tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
+                    tableRows.append(tableRow)
+
+            if len(removedFromOther_CVLP) !=0:
+                matchType = "removedFromOtherProject"
+                for publishedState in removedFromOther_CVLP:
+                    otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
+                    tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, None, None, None, None, matchType]
+                    tableRows.append(tableRow)
     else:
         
         for publishedState in common_CVLP:

@@ -567,29 +567,3 @@ def process_unreconcilable_CV_Items(componentName, primaryProject_CV_Data, other
         tableRows.append(tableRow)
 
     return tableRows
-
-
-
-#----------------------------------------------#
-def create_project_hierarchy(project, parentID, projectList, baseURL):
-    logger.debug("Entering create_project_hierarchy")
-
-    # Are there more child projects for this project?
-    if len(project["childProject"]):
-
-        # Sort by project name of child projects
-        for childProject in sorted(project["childProject"], key = lambda i: i['name'] ) :
-
-            uniqueProjectID = str(parentID) + "-" + str(childProject["id"])
-            nodeDetails = {}
-            nodeDetails["projectID"] = childProject["id"]
-            nodeDetails["parent"] = parentID
-            nodeDetails["uniqueID"] = uniqueProjectID
-            nodeDetails["projectName"] = childProject["name"]
-            nodeDetails["projectLink"] = baseURL + "/codeinsight/FNCI#myprojectdetails/?id=" + str(childProject["id"]) + "&tab=projectInventory"
-
-            projectList.append( nodeDetails )
-
-            create_project_hierarchy(childProject, uniqueProjectID, projectList, baseURL)
-
-    return projectList

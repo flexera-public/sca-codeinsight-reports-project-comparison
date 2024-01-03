@@ -282,7 +282,7 @@ def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
         if len(primaryProject_CV_Data) ==  len(otherProject_CV_Data):
             # There are an equal number of items in both projects
             if len(primaryProject_CV_Data) == 1:
-                # Just a simple version change what about the license
+                # Just a single version change what about the license
                 primaryProjectVerion = list(primaryProject_CV_Data.keys())[0]
                 otherProjectVerion = list(otherProject_CV_Data.keys())[0]
 
@@ -336,7 +336,10 @@ def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
         return tableRows
 
 
-  #------------------------------------------
+#-----------------------------------------------------------------------    
+#  There is a component with a matching version so the license
+#  needs to be looked at to determine if there are any differences
+#-----------------------------------------------------------------------    
 def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion):
     tableRows = []
     primaryProject_CVL_Data = primaryProject_CV_Data[primaryProjectVerion]["licenses"]
@@ -352,24 +355,38 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
     removedFromOther_CVL = list((setotherProject_CVL_Data).difference(setprimaryProject_CVL_Data))  
 
     if len(common_CVL) == 0: 
-        if len(addedToPrimary_CVL) == len(removedFromOther_CVL):
-            # Equal number of unique CVL items from each hierarchy
-            if len(addedToPrimary_CVL) == 1:
-                
-                primaryProjectLicense = addedToPrimary_CVL[0]
-                otherProjectLicense = removedFromOther_CVL[0]
+        # There are no common licenses between the two project
+        if len(addedToPrimary_CVL) == len(removedFromOther_CVL) and len(addedToPrimary_CVL) == 1:
+            # Equal number of CV matches
 
-                tableRows = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense)
+            # There is a single item in each project with this CV combination so the license has changed
+            primaryProjectLicense = addedToPrimary_CVL[0]
+            otherProjectLicense = removedFromOther_CVL[0]
 
-                return tableRows
-            else:
-                return[[componentName, None, None, None, None, "TODO", "Multiple licenses", None, None]]
+            tableRows = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense)
+
+            return tableRows
      
         else:
-            return[[componentName, None, None, None, None, "TODO", "Unequal quanity of license", None, None]]
-        
+            # There is an uneven number of the same CV with different licenses in the projects
+            if len(addedToPrimary_CVL) !=0:
+                matchType = "addedToPrimaryProject"
+                for license in addedToPrimary_CVL:
+                    for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
+                        primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
+                        tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
+                        tableRows.append(tableRow)
+            
+            if len(removedFromOther_CVL) !=0:
+                matchType = "removedFromOtherProject"
+                for license in removedFromOther_CVL:
+                    for publishedState in otherProject_CVL_Data[license]["publishedState"]:
+                        otherProjectProjects = otherProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
+                        tableRow = [componentName, otherProjectVerion, license, otherProjectProjects, publishedState, None, None, None, None, matchType]
+                        tableRows.append(tableRow)  
+            return tableRows
     else:
-        # Cycle through each of the common matches
+        # There are common licenses for this CV item so report on those
         for license in common_CVL:        
             tableRows += compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, otherProject_CVL_Data, otherProjectVerion, license)        
 

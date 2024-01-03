@@ -29,7 +29,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
     tableData = []
 
     # Get inventory details for primary project
-    primaryProjectList, primaryProjectInventoryData = get_project_details(baseURL, authToken, primaryProjectID, reportData)
+    primaryProjectList, primaryProjectInventoryData, primaryProjectInventoryCount = get_project_details(baseURL, authToken, primaryProjectID, reportData)
 
     if "errorMsg" in primaryProjectInventoryData:
         print(primaryProjectInventoryData)
@@ -41,7 +41,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
         largestHierachy = len(primaryProjectList)
        
     # Get inventory details for primary project
-    otherProjectList, otherProjectInventoryData = get_project_details(baseURL, authToken, otherProjectID, reportData)
+    otherProjectList, otherProjectInventoryData, otherProjectInventoryCount = get_project_details(baseURL, authToken, otherProjectID, reportData)
     otherProjectName = otherProjectList[0]["projectName"]
 
     
@@ -114,8 +114,10 @@ def gather_data_for_report(baseURL, authToken, reportData):
 
     reportData["primaryProjectName"] = primaryProjectName
     reportData["primaryProjectList"] = primaryProjectList
+    reportData["primaryProjectInventoryCount"] = primaryProjectInventoryCount
     reportData["otherProjectName"] = otherProjectName
     reportData["otherProjectList"] = otherProjectList
+    reportData["otherProjectInventoryCount"] = otherProjectInventoryCount
     reportData["largestHierachy"] = largestHierachy
     reportData["tableData"] = tableData
   
@@ -124,6 +126,8 @@ def gather_data_for_report(baseURL, authToken, reportData):
 #------------------------------------------
 def get_project_details(baseURL, authToken, projectID, reportData):
     inventoryData = {} # Create a dictionary containing the inventory data using name strings as keys
+    inventoryCount = {}
+    inventoryCount["total"] = 0
 
     reportOptions = reportData["reportOptions"]
     releaseVersion = reportData["releaseVersion"]
@@ -137,6 +141,7 @@ def get_project_details(baseURL, authToken, projectID, reportData):
 
         projectID = project["projectID"]
         projectName = project["projectName"]
+        projectInventoryCount = 0
 
         if includeUnpublishedInventory:
             publishedStates = ["PUBLISHED", "UNPUBLISHED"]
@@ -155,6 +160,7 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                 return None, projectInventoryResponse
             
             print("            %s items returned." %len(projectInventoryResponse))
+            projectInventoryCount += len(projectInventoryResponse)
 
             # For display purposes
             publishedState = "Published" if publishedState == "PUBLISHED" else "Not Published" 
@@ -249,8 +255,11 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
                     inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
+             
+        inventoryCount[projectID] =  projectInventoryCount
+        inventoryCount["total"] += projectInventoryCount
 
-    return projectList, inventoryData
+    return projectList, inventoryData, inventoryCount
 
 
 #------------------------------------------

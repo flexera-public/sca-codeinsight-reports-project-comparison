@@ -20,7 +20,9 @@ def generate_html_report(reportData):
     reportFileNameBase = reportData["reportFileNameBase"]
     reportTimeStamp =  reportData["reportTimeStamp"] 
     primaryProjectName = reportData["primaryProjectName"]
+    primaryProjectInventoryCount = reportData["primaryProjectInventoryCount"]
     otherProjectName = reportData["otherProjectName"]
+    otherProjectInventoryCount = reportData["otherProjectInventoryCount"]
     largestHierachy = reportData["largestHierachy"]
     reportOptions = reportData["reportOptions"]
     includeUnpublishedInventory = reportOptions["includeUnpublishedInventory"]  # True/False
@@ -125,12 +127,12 @@ def generate_html_report(reportData):
         html_ptr.write("    <div class='row'>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %otherProjectName) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy<br>(%s Total Items)</center></h6>" %(otherProjectName, otherProjectInventoryCount["total"]) )
         html_ptr.write("            <div id='project_hierarchy1'></div>\n")
         html_ptr.write("        </div>\n")
 
         html_ptr.write("        <div class='col-sm'>\n")
-        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy</center></h6>" %primaryProjectName) 
+        html_ptr.write("<h6 class='gray' style='padding-top: 10px;'><center>%s<br>Project Hierarchy<br>(%s Total Items)</center></h6>" %(primaryProjectName, primaryProjectInventoryCount["total"]) )
         html_ptr.write("            <div id='project_hierarchy2'></div>\n")
         html_ptr.write("        </div>\n")
 
@@ -324,8 +326,8 @@ def generate_html_report(reportData):
 
     if largestHierachy > 1:
         # Add the js for the project summary stacked bar charts
-        generate_project_hierarchy_tree(html_ptr, reportData["otherProjectList"], "project_hierarchy1")
-        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], "project_hierarchy2")
+        generate_project_hierarchy_tree(html_ptr, reportData["otherProjectList"], otherProjectInventoryCount, "project_hierarchy1")
+        generate_project_hierarchy_tree(html_ptr, reportData["primaryProjectList"], primaryProjectInventoryCount, "project_hierarchy2")
         
     
     html_ptr.write('''
@@ -478,7 +480,7 @@ def encodeImage(imageFile):
         raise
 
 #----------------------------------------------------------------------------------------#
-def generate_project_hierarchy_tree(html_ptr, projectHierarchy, chartIdentifier):
+def generate_project_hierarchy_tree(html_ptr, projectHierarchy, projectInventoryCount, chartIdentifier):
     logger.info("Entering generate_project_hierarchy_tree")
 
     html_ptr.write('''var hierarchy = [\n''')
@@ -491,14 +493,16 @@ def generate_project_hierarchy_tree(html_ptr, projectHierarchy, chartIdentifier)
         else:
             projectIdentifier = project["projectID"]
 
+        inventoryCount = projectInventoryCount[project["projectID"]]
+
         html_ptr.write('''{
             'id': '%s', 
             'parent': '%s', 
-            'text': '%s',
+            'text': '%s (%s items)',
             'a_attr': {
                 'href': '%s'
             }
-        },\n'''  %(projectIdentifier, project["parent"], project["projectName"], project["projectLink"]))
+        },\n'''  %(projectIdentifier, project["parent"], project["projectName"], inventoryCount, project["projectLink"]))
 
     html_ptr.write('''\n]''')
 

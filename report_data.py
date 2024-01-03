@@ -306,8 +306,13 @@ def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
             tableRows += compare_CVL(componentName, primaryProject_CV_Data, version, otherProject_CV_Data, version)  
 
         # Now deal with the unique items if there are any
-        if len(addedToPrimaryCV) != 0:
-            matchType = "addedToPrimaryProject"
+            
+
+        if len(addedToPrimaryCV) !=0:
+            if  len(removedFromOtherCV) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "addedToPrimaryProject"
 
             for version in addedToPrimaryCV:
                 # Pass the dict as the func expects it
@@ -321,7 +326,10 @@ def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
                 tableRows.append(tableRow)
 
         if len(removedFromOtherCV) !=0:
-            matchType = "removedFromOtherProject"
+            if  len(addedToPrimaryCV) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "removedFromOtherProject"
 
             for version in removedFromOtherCV:
                 # Pass the dict as the func expects it
@@ -370,20 +378,29 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
         else:
             # There is an uneven number of the same CV with different licenses in the projects
             if len(addedToPrimary_CVL) !=0:
-                matchType = "addedToPrimaryProject"
+                if  len(removedFromOther_CVL) !=0:
+                    matchType = "unreconcilable"
+                else:
+                    matchType = "addedToPrimaryProject"
+
                 for license in addedToPrimary_CVL:
                     for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
                         primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
                         tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
                         tableRows.append(tableRow)
-            
+
             if len(removedFromOther_CVL) !=0:
-                matchType = "removedFromOtherProject"
+                if  len(addedToPrimary_CVL) !=0:
+                    matchType = "unreconcilable"
+                else:
+                    matchType = "removedFromOtherProject"  
+
                 for license in removedFromOther_CVL:
                     for publishedState in otherProject_CVL_Data[license]["publishedState"]:
                         otherProjectProjects = otherProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
                         tableRow = [componentName, otherProjectVerion, license, otherProjectProjects, publishedState, None, None, None, None, matchType]
-                        tableRows.append(tableRow)  
+                        tableRows.append(tableRow) 
+
             return tableRows
     else:
         # There are common licenses for this CV item so report on those
@@ -391,15 +408,23 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
             tableRows += compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, otherProject_CVL_Data, otherProjectVerion, license)        
 
         if len(addedToPrimary_CVL) !=0:
-            matchType = "addedToPrimaryProject"
+            if  len(removedFromOther_CVL) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "addedToPrimaryProject"
+
             for license in addedToPrimary_CVL:
                 for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
                     primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
                     tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
                     tableRows.append(tableRow)
-        
+
         if len(removedFromOther_CVL) !=0:
-            matchType = "removedFromOtherProject"
+            if  len(addedToPrimary_CVL) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "removedFromOtherProject"  
+
             for license in removedFromOther_CVL:
                 for publishedState in otherProject_CVL_Data[license]["publishedState"]:
                     otherProjectProjects = otherProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
@@ -440,14 +465,22 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
         else:
             #There are more than single non common CVLP match so print them out
             if len(addedToPrimary_CVLP) !=0:
-                matchType = "addedToPrimaryProject"
+                if  len(removedFromOther_CVLP) !=0:
+                    matchType = "unreconcilable"
+                else:
+                    matchType = "addedToPrimaryProject"
+                
                 for publishedState in addedToPrimary_CVLP:
                     primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
                     tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
                     tableRows.append(tableRow)
 
             if len(removedFromOther_CVLP) !=0:
-                matchType = "removedFromOtherProject"
+                if  len(addedToPrimary_CVLP) !=0:
+                    matchType = "unreconcilable"
+                else:
+                    matchType = "removedFromOtherProject"
+                    
                 for publishedState in removedFromOther_CVLP:
                     otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
                     tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, None, None, None, None, matchType]
@@ -460,15 +493,24 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
             tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState]
             tableRows.append(tableRow)
 
+
         if len(addedToPrimary_CVLP) !=0:
-            matchType = "addedToPrimaryProject"
+            if  len(removedFromOther_CVLP) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "addedToPrimaryProject"
+            
             for publishedState in addedToPrimary_CVLP:
                 primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
                 tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
                 tableRows.append(tableRow)
 
         if len(removedFromOther_CVLP) !=0:
-            matchType = "removedFromOtherProject"
+            if  len(addedToPrimary_CVLP) !=0:
+                matchType = "unreconcilable"
+            else:
+                matchType = "removedFromOtherProject"
+
             for publishedState in removedFromOther_CVLP:
                 otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
                 tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, None, None, None, None, matchType]

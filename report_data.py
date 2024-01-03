@@ -70,6 +70,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
             primaryProjectLicense =    tableRow[6] 
             primaryProjectPublicationState =   tableRow[8] 
 
+            
             matchType = "C" # At a bare minimum the components match here
 
             if primaryProjectVersion == otherProjectVersion:
@@ -157,7 +158,6 @@ def get_project_details(baseURL, authToken, projectID, reportData):
 
             # For display purposes
             publishedState = "Published" if publishedState == "PUBLISHED" else "Not Published" 
-
 
             # Cycle through each item to get the CVL data
             for inventoryItem in projectInventoryResponse:
@@ -277,73 +277,59 @@ def compare_CV(componentName, primaryProject_C_Data, otherProject_C_Data):
                 primaryProjectVerion = list(primaryProject_CV_Data.keys())[0]
                 otherProjectVerion = list(otherProject_CV_Data.keys())[0]
 
-                tableRow = compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion)
-                tableRows.append(tableRow)
+                tableRows += compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion)
+                
                 return tableRows
             else:
                 # Same number of CV items in each project but not way to know which ones could be related
-                tableRows = process_unreconcilable_CV_Items(componentName, primaryProject_CV_Data, otherProject_CV_Data)
+                tableRows += process_unreconcilable_CV_Items(componentName, primaryProject_CV_Data, otherProject_CV_Data)
                 return tableRows
         else:
             # Different number of versions for each set and none in common and no way to determine if one is an upgrade to
             # another or not so just combine the information into a single row and mark as unreconcilable
-            tableRows = process_unreconcilable_CV_Items(componentName, primaryProject_CV_Data, otherProject_CV_Data)
-            return tableRows
-
-    elif len(common_CV) == 1:  # There is at least single common versions match
-
-        if len(addedToPrimaryCV) == 0 and len(removedFromOtherCV) == 0:
-            # It is a single unique match for this component
-            version = common_CV[0]
-            print("        Exact version match - %s" %common_CV[0])
-            tableRow = compare_CVL(componentName, primaryProject_CV_Data, version, otherProject_CV_Data, version)
-            tableRows.append(tableRow)
-            return tableRows
-        else:
-            # Along with a single exact version match there are also other entries for this component
-            # Manage the exact match
-            version = common_CV[0]
-            print("        Exact version match - %s" %common_CV[0])
-            tableRow = compare_CVL(componentName, primaryProject_CV_Data, version, otherProject_CV_Data, version)
-            tableRows.append(tableRow)
-
-            # Now deal with the unique items if there are any
-            if len(addedToPrimaryCV) != 0:
-                matchType = "addedToPrimaryProject"
-
-                for version in addedToPrimaryCV:
-                    # Pass the dict as the func expects it
-                    partialRow = process_unique_component({version: primaryProject_CV_Data[version]})
-                    
-                    if "errorMsg" in partialRow:
-                        return {"errorMsg", "%s for %s" %(partialRow["errorMsg"], componentName)}
-
-                    tableRow = [componentName, None, None, None, None] + partialRow[0] + [matchType]
-                    tableRows.append(tableRow)
-
-            if len(removedFromOtherCV) !=0:
-                matchType = "removedFromOtherProject"
-
-                for version in removedFromOtherCV:
-                    # Pass the dict as the func expects it
-                    partialRow = process_unique_component({version: otherProject_CV_Data[version]})
-                    
-                    if "errorMsg" in partialRow:
-                        return {"errorMsg", "%s for %s" %(partialRow["errorMsg"], componentName)}
-
-                    tableRow = [componentName] + partialRow[0] +[ None, None, None, None, matchType]
-                    tableRows.append(tableRow)
-                    
+            tableRows += process_unreconcilable_CV_Items(componentName, primaryProject_CV_Data, otherProject_CV_Data)
             return tableRows
     
-    else:  # There are mulitiple common versions for this component
-        print("        Multiple common comp/versions")
-        return[[componentName, None, None, None, None, "TODO", "Multiple common comp/versions", None, None]]
+    else:  # There are one or more common components
+        for version in common_CV:
+            # It is a single unique match for this component
+            print("        Exact version match - %s" %version)
+            tableRows += compare_CVL(componentName, primaryProject_CV_Data, version, otherProject_CV_Data, version)  
+
+        # Now deal with the unique items if there are any
+        if len(addedToPrimaryCV) != 0:
+            matchType = "addedToPrimaryProject"
+
+            for version in addedToPrimaryCV:
+                # Pass the dict as the func expects it
+                partialRow = process_unique_component({version: primaryProject_CV_Data[version]})
+                
+                if "errorMsg" in partialRow:
+                    return {"errorMsg", "%s for %s" %(partialRow["errorMsg"], componentName)}
+
+                tableRow = [componentName, None, None, None, None] + partialRow[0] + [matchType]
+                #tableRows += tableRow
+                tableRows.append(tableRow)
+
+        if len(removedFromOtherCV) !=0:
+            matchType = "removedFromOtherProject"
+
+            for version in removedFromOtherCV:
+                # Pass the dict as the func expects it
+                partialRow = process_unique_component({version: otherProject_CV_Data[version]})
+                
+                if "errorMsg" in partialRow:
+                    return {"errorMsg", "%s for %s" %(partialRow["errorMsg"], componentName)}
+
+                tableRow = [componentName] + partialRow[0] +[ None, None, None, None, matchType]
+                tableRows.append(tableRow)
+
+        return tableRows
 
 
   #------------------------------------------
 def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, otherProject_CV_Data, otherProjectVerion):
-
+    tableRows = []
     primaryProject_CVL_Data = primaryProject_CV_Data[primaryProjectVerion]["licenses"]
     otherProject_CVL_Data = otherProject_CV_Data[otherProjectVerion]["licenses"]
 
@@ -364,29 +350,42 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
                 primaryProjectLicense = addedToPrimary_CVL[0]
                 otherProjectLicense = removedFromOther_CVL[0]
 
-                tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense)
+                tableRows = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense)
 
-                return tableRow
+                return tableRows
             else:
                 return[[componentName, None, None, None, None, "TODO", "Multiple licenses", None, None]]
      
         else:
             return[[componentName, None, None, None, None, "TODO", "Unequal quanity of license", None, None]]
-            
-
-    elif len(common_CVL) == 1:  # Exact match for CVL so need to look at projects and published states
-        license = common_CVL[0]
-        print("            Exact license match - %s" %license)
- 
-        tableRow = compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, otherProject_CVL_Data, otherProjectVerion, license)
-        return tableRow
+        
     else:
-        print("            Mutliple common licenses for  %s-%s-%s" %(componentName, primaryProjectVerion, otherProjectVerion))
-        return[[componentName, None, None, None, None, "TODO", "Muliple Common Licenses", None, None]]
+        # Cycle through each of the common matches
+        for license in common_CVL:        
+            tableRows += compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, license, otherProject_CVL_Data, otherProjectVerion, license)        
+
+        if len(addedToPrimary_CVL) !=0:
+            matchType = "addedToPrimaryProject"
+            for license in addedToPrimary_CVL:
+                for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
+                    primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
+                    tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
+                    tableRows.append(tableRow)
+        
+        if len(removedFromOther_CVL) !=0:
+            matchType = "removedFromOtherProject"
+            for license in removedFromOther_CVL:
+                for publishedState in otherProject_CVL_Data[license]["publishedState"]:
+                    otherProjectProjects = otherProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
+                    tableRow = [componentName, otherProjectVerion, license, otherProjectProjects, publishedState, None, None, None, None, matchType]
+                    tableRows.append(tableRow)
+
+        return tableRows
+
 
 #------------------------------
 def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, primaryProjectLicense, otherProject_CVL_Data, otherProjectVerion, otherProjectLicense):
-
+    tableRows = []
     primaryProject_CVLP_Data = primaryProject_CVL_Data[primaryProjectLicense]["publishedState"]
     otherProject_CVLP_Data = otherProject_CVL_Data[otherProjectLicense]["publishedState"]
        
@@ -411,28 +410,38 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
                 otherProjectProjects = otherProject_CVLP_Data[otherProjectPublishedState]["projects"]
 
                 tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, otherProjectPublishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState]
-
-                return tableRow
+                tableRows.append(tableRow)
+                return tableRows
             
             else:
                 return[[componentName, None, None, None, None, "TODO", "Equal but different counts for published state", None, None]]
             
         else:
             return[[componentName, None, None, None, None, "TODO", "Differing counts for published state", None, None]]
-
-   
-    elif len(common_CVLP) == 1:  # Exact match for CVL so need to look at projects and published states
-        publishedState = common_CVLP[0]
-        primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
-        otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
-
-        tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState]
-        return tableRow
     else:
+        
+        for publishedState in common_CVLP:
+            primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
+            otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
+            tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState]
+            tableRows.append(tableRow)
 
-        return[[componentName, None, None, None, None, "TODO", "Mutliple publication states", None, None]]
+        if len(addedToPrimary_CVLP) !=0:
+            matchType = "addedToPrimaryProject"
+            for publishedState in addedToPrimary_CVLP:
+                primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
+                tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
+                tableRows.append(tableRow)
 
+        if len(removedFromOther_CVLP) !=0:
+            matchType = "removedFromOtherProject"
+            for publishedState in removedFromOther_CVLP:
+                otherProjectProjects = otherProject_CVLP_Data[publishedState]["projects"]
+                tableRow = [componentName, otherProjectVerion, otherProjectLicense, otherProjectProjects, publishedState, None, None, None, None, matchType]
+                tableRows.append(tableRow)
 
+        return tableRows
+   
 #------------------------------
 def process_unique_component(componentVersionDetails):
 

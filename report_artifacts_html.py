@@ -173,17 +173,20 @@ def generate_html_report(reportData):
     html_ptr.write("<table id='comparisonData' class='table table-hover row-border table-sm' style='width:90%'>\n")
 
     html_ptr.write("<colgroup>\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 20%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 15%;\">\n")
+    html_ptr.write("<col span=\"1\" style=\"width: 20%;\">\n")  #  Component
+
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  # Other Version
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  # Other License
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  # Other Projects
     if includeUnpublishedInventory:
-        html_ptr.write("<col span=\"1\" style=\"width: 5%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 15%;\">\n")
+        html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  #  Other Published State
+
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  #  Primary Version
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  #  Primary License
+    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  #  Primary Projects
     if includeUnpublishedInventory:
-        html_ptr.write("<col span=\"1\" style=\"width: 5%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
-    html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")
+        html_ptr.write("<col span=\"1\" style=\"width: 10%;\">\n")  #  Primary Published State
+    
     html_ptr.write("</colgroup>\n")
 
     html_ptr.write("    <thead>\n")

@@ -224,7 +224,6 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                                     if projectName in inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"]:
                                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                                     else:
-                                        inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"] = {}
                                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName] = []
                                         inventoryData[componentId]["componentVersions"][componentVersionName]["licenses"][selectedLicense]["publishedState"][publishedState]["projects"][projectName].append(inventoryLink)
                             else:

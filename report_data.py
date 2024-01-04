@@ -73,17 +73,19 @@ def gather_data_for_report(baseURL, authToken, reportData):
             primaryProjectLicense =    tableRow[6] 
             primaryProjectPublicationState =   tableRow[8] 
 
+            # Was there a match type already applied?  If not apply one
+            if len(tableRow) == 9:
             
-            matchType = "C" # At a bare minimum the components match here
+                matchType = "C" # At a bare minimum the components match here
 
-            if primaryProjectVersion == otherProjectVersion:
-                matchType += "V"
-            if primaryProjectLicense == otherProjectLicense:
-                matchType += "L"
-            if primaryProjectPublicationState == otherProjectPublicationState:
-                matchType += "P"
+                if primaryProjectVersion == otherProjectVersion:
+                    matchType += "V"
+                if primaryProjectLicense == otherProjectLicense:
+                    matchType += "L"
+                if primaryProjectPublicationState == otherProjectPublicationState:
+                    matchType += "P"
 
-            tableRow.append(matchType)
+                tableRow.append(matchType)
             tableData.append(tableRow)
     
     # Get data for the components that are unique to the primary project

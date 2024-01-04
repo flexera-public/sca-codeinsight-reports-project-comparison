@@ -32,6 +32,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
     primaryProjectList, primaryProjectInventoryData, primaryProjectInventoryCount = get_project_details(baseURL, authToken, primaryProjectID, reportData)
 
     if "errorMsg" in primaryProjectInventoryData:
+        # TODO
         print(primaryProjectInventoryData)
 
     primaryProjectName = primaryProjectList[0]["projectName"]
@@ -43,7 +44,6 @@ def gather_data_for_report(baseURL, authToken, reportData):
     # Get inventory details for primary project
     otherProjectList, otherProjectInventoryData, otherProjectInventoryCount = get_project_details(baseURL, authToken, otherProjectID, reportData)
     otherProjectName = otherProjectList[0]["projectName"]
-
     
     # How much space will be required for the hierarchies display?
     if len(otherProjectList) > largestHierachy:
@@ -385,8 +385,8 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
 
                 for license in addedToPrimary_CVL:
                     for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
-                        primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
-                        tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
+                        primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]  
+                        tableRow = [componentName, None, None, None, None, primaryProjectVerion, license, primaryProjectProjects, publishedState, matchType]
                         tableRows.append(tableRow)
 
             if len(removedFromOther_CVL) !=0:
@@ -415,8 +415,8 @@ def compare_CVL(componentName, primaryProject_CV_Data, primaryProjectVerion, oth
 
             for license in addedToPrimary_CVL:
                 for publishedState in primaryProject_CVL_Data[license]["publishedState"]:
-                    primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]         
-                    tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, license, primaryProjectProjects, matchType]
+                    primaryProjectProjects = primaryProject_CVL_Data[license]["publishedState"][publishedState]["projects"]
+                    tableRow = [componentName, None, None, None, None, primaryProjectVerion, license, primaryProjectProjects, publishedState, matchType]
                     tableRows.append(tableRow)
 
         if len(removedFromOther_CVL) !=0:
@@ -455,7 +455,7 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
             primaryProjectPublishedState = addedToPrimary_CVLP[0]
             otherProjectPublishedState = removedFromOther_CVLP[0]
 
-            primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]
+            primaryProjectProjects = primaryProject_CVLP_Data[primaryProjectPublishedState]["projects"]  
             otherProjectProjects = otherProject_CVLP_Data[otherProjectPublishedState]["projects"]
 
             tableRow = [componentName, otherProjectVerion, otherProjectLicense,  otherProjectProjects, otherProjectPublishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, primaryProjectPublishedState]
@@ -472,7 +472,7 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
                 
                 for publishedState in addedToPrimary_CVLP:
                     primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
-                    tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
+                    tableRow = [componentName, None, None, None, None, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState, matchType]
                     tableRows.append(tableRow)
 
             if len(removedFromOther_CVLP) !=0:
@@ -502,7 +502,7 @@ def compare_CVLP(componentName, primaryProject_CVL_Data, primaryProjectVerion, p
             
             for publishedState in addedToPrimary_CVLP:
                 primaryProjectProjects = primaryProject_CVLP_Data[publishedState]["projects"]
-                tableRow = [componentName, None, None, None, None, publishedState, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, matchType]
+                tableRow = [componentName, None, None, None, None, primaryProjectVerion, primaryProjectLicense, primaryProjectProjects, publishedState, matchType]
                 tableRows.append(tableRow)
 
         if len(removedFromOther_CVLP) !=0:

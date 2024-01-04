@@ -32,8 +32,7 @@ def gather_data_for_report(baseURL, authToken, reportData):
     primaryProjectList, primaryProjectInventoryData, primaryProjectInventoryCount = get_project_details(baseURL, authToken, primaryProjectID, reportData)
 
     if "errorMsg" in primaryProjectInventoryData:
-        # TODO
-        print(primaryProjectInventoryData)
+        return primaryProjectInventoryData
 
     primaryProjectName = primaryProjectList[0]["projectName"]
 
@@ -43,6 +42,10 @@ def gather_data_for_report(baseURL, authToken, reportData):
        
     # Get inventory details for primary project
     otherProjectList, otherProjectInventoryData, otherProjectInventoryCount = get_project_details(baseURL, authToken, otherProjectID, reportData)
+
+    if "errorMsg" in otherProjectInventoryData:
+        return otherProjectInventoryData
+
     otherProjectName = otherProjectList[0]["projectName"]
     
     # How much space will be required for the hierarchies display?

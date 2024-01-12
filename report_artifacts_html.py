@@ -451,9 +451,12 @@ def generate_html_report(reportData):
 
             $(document).ready(function () {
                 $('button').on('click', function() {
-                $('button').removeClass('active');
-                $(this).addClass('active');
-            });
+                    $('button').removeClass('active');
+                    if (this.id === 'showAllDifferences' || this.id == 'showVersionDifferences' || this.id == 'showLicenseDifferences' || this.id == 'showUnreconcilable') {
+                        $('#showDifferences').addClass('active');
+                    }
+                    $(this).addClass('active');
+                });
             });
 
         ''')

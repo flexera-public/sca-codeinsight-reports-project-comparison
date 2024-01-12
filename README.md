@@ -1,6 +1,20 @@
 # sca-codeinsight-reports-project-comparison
 
-The `sca-codeinsight-reports-project-comparison` repository is a example report for Revenera's Code Insight product. That allows a user to compare the inventory between two different projects.
+The `sca-codeinsight-reports-project-comparison` repository is a example report for Revenera's Code Insight product that allows a user to compare the inventory between two different projects and any child projects.
+
+
+This report will show differecnes between the two projects strutcts to highlight:
+- All items
+- Unchagned Items
+- Differences between projects
+	- All differences
+	- Version differences
+	- License differences
+	- Publish state differences
+	- Items that could not be reconciled
+- Items Remvoed
+- Items Added
+
 
 
 This repository utilizes the following via CDN for the creation of the report artifacts.
@@ -17,6 +31,7 @@ This repository utilizes the following via CDN for the creation of the report ar
 |1.0.x |2020R3  |
 |1.1.x |2021R2  |
 |2.0.x |2021R2  |
+|3.0.x |2023R4  |
 
 **Repository Cloning**
 
@@ -69,7 +84,6 @@ To register this report:
 
     python registration.py -reg
 
-
 To unregister this report:
 
     python registration.py -unreg
@@ -85,6 +99,7 @@ This report is executed directly from within Revenera's Code Insight product. Fr
 The following report options can be set once the report generation has been initiated:
 
 - Including child projects (True/False) - Determine if child project data will be included or not.
+- Included unpublsihed inventory items
 - Project name for comparison
 
 The Code Insight Custom Report Framework will provide the following to the custom report when initiated:

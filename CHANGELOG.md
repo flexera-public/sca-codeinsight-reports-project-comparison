@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2024-01-12
+### Changed
+- Redesigned report to show changed version in single row
+- Redesigned report to consider multiple instance of a single component
+- Redeisnged report to consider single components across multiple child projects
+
+### Added
+- Project inventory counts for hierarchy display
+- Matching project indicator
+- Added multiple filters for all, common, added, removed and mutiple difference types between projects
+- Support for Work in Progress and License Only items
+
+
 ## [2.3.1] - 2023-10-16
 ### Changed
 - Update common submodule to prep for tomcat upgrade in 2023R4

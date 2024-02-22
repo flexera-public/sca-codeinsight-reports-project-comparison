@@ -209,7 +209,7 @@ def get_project_details(baseURL, authToken, projectID, reportData):
 
                             selectedLicense = licenseDetails["spdxIdentifier"]
                     
-                            if selectedLicense == "":
+                            if selectedLicense in ["", "N/A"]:
                                 selectedLicense = licenseDetails["shortName"]
                             
                             licenseMappings[selectedLicenseId] = selectedLicense

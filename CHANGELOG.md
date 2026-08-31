@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-08-28
+### Changed
+- Inclusion of License Expression
+
 ## [3.0.0] - 2024-01-12
 ### Changed
 - Redesigned report to show changed version in single row

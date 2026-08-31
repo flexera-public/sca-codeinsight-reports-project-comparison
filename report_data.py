@@ -11,12 +11,72 @@ File : report_data.py
 import logging
 import common.api.project.get_project_inventory
 import common.api.project.get_inventory_summary
+import common.api.inventory.get_inventory_details
 import common.project_heirarchy
 import common.api.license.license_lookup
 
 logger = logging.getLogger(__name__)
 
 licenseMappings = {}
+licenseExpressionMappings = {}  # inventoryId -> resolved short-name expression string
+
+# Sentinel selectedLicenseId values returned by the inventory summary API when
+# the item's actual license is expressed as an SPDX expression (e.g.
+# "MIT OR Apache-2.0") rather than a single license row. In these cases the
+# summary payload has no expression field, so we fetch the full inventory item
+# details and rebuild the expression using short names.
+LICENSE_EXPRESSION_SENTINEL_IDS = {-1, -2, 69, "-1", "-2", "69"}
+
+
+#-------------------------------------------------------------------#
+def resolve_license_expression_short_names(baseURL, authToken, inventoryId):
+    '''
+    Look up the inventory item details for `inventoryId` and return its
+    licenseExpression rewritten with each license's licenseShortName (falling
+    back to licenseSPDXIdentifier then licenseName). Returns None if no usable
+    expression is available. Results are cached per inventoryId.
+    '''
+    if inventoryId in licenseExpressionMappings:
+        return licenseExpressionMappings[inventoryId]
+
+    try:
+        inventoryDetails = common.api.inventory.get_inventory_details.get_inventory_item_details_no_vuln_data(
+            inventoryId, baseURL, authToken)
+    except Exception as e:
+        logger.error("Unable to fetch inventory item details for id %s: %s" % (inventoryId, e))
+        licenseExpressionMappings[inventoryId] = None
+        return None
+
+    expressionDetails = (inventoryDetails or {}).get("licenseExpressionDetails") or {}
+    expression = expressionDetails.get("licenseExpression")
+    licenses = expressionDetails.get("licenses") or []
+
+    def _short(lic):
+        for key in ("licenseShortName", "licenseSPDXIdentifier", "licenseName"):
+            val = lic.get(key)
+            if val and val != "N/A":
+                return val
+        return None
+
+    resolved = None
+    if expression and expression != "N/A":
+        # Replace each license's full name with its short name. Sort by
+        # licenseName length descending so longer names are substituted first
+        # and can't be partially matched by a shorter name that shares a prefix.
+        resolved = expression
+        for lic in sorted(licenses, key=lambda l: len(l.get("licenseName") or ""), reverse=True):
+            fullName = lic.get("licenseName")
+            shortName = _short(lic)
+            if fullName and shortName and fullName != "N/A" and fullName in resolved:
+                resolved = resolved.replace(fullName, shortName)
+    elif licenses:
+        # Expression string missing but license list is present: join short names.
+        names = [n for n in (_short(l) for l in licenses) if n]
+        if names:
+            resolved = " OR ".join(names)
+
+    licenseExpressionMappings[inventoryId] = resolved
+    return resolved
 
 #-------------------------------------------------------------------#
 def gather_data_for_report(baseURL, authToken, reportData):
@@ -192,10 +252,24 @@ def get_project_details(baseURL, authToken, projectID, reportData):
                     componentName = inventoryItem["name"]
                     componentVersionName = "License Only"
 
-                # The project summary API currently returns the full license name 
-                # and not the SPDX ID so create mapping    
+                # If this item's license is actually a multi-license expression,
+                # the summary API returns a sentinel selectedLicenseId (-1, -2, 69)
+                # and no expression field. Fetch the inventory item details and
+                # rebuild the expression using license short names.
+                licenseExpression = None
+                if selectedLicenseId in LICENSE_EXPRESSION_SENTINEL_IDS:
+                    licenseExpression = resolve_license_expression_short_names(baseURL, authToken, inventoryId)
+                    if licenseExpression:
+                        selectedLicense = licenseExpression
+
+                # The project summary API currently returns the full license name
+                # and not the SPDX ID so create mapping
                 if releaseVersion <= "2024R3":
-                    if selectedLicenseId != "N/A":
+                    if licenseExpression:
+                        # Already resolved above; skip the single-license lookup path
+                        # since these sentinel IDs don't map to a real license row.
+                        pass
+                    elif selectedLicenseId != "N/A":
 
                         if selectedLicenseId in licenseMappings:
                             selectedLicense = licenseMappings[selectedLicenseId]            
